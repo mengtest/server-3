@@ -1,7 +1,6 @@
 local skynet = require("skynet")
 
 skynet.start(function()
-    skynet.newservice("mongodb")
-    skynet.call("db", "lua", "start")
+    skynet.call(skynet.uniqueservice(true, "global/mongo"), "lua", "start")
 	skynet.exit()
 end)

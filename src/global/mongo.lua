@@ -48,7 +48,7 @@ end
 skynet.start(function()
     skynet.dispatch("lua", function(session, address, cmd, ...)
         local func = CMD[cmd]
-        assert(func, "db func is nil")
+        assert(func, "mongo func is nil")
         if session == 0 then
             func(...)
         else
@@ -56,5 +56,5 @@ skynet.start(function()
         end
     end)
 
-    skynet.register("db")
+    skynet.register("mongo")
 end)
