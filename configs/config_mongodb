@@ -1,0 +1,22 @@
+root = "./skynet/"
+thread = 4
+logger = nil
+harbor = 2
+
+master = "127.0.0.1:8000"
+address = "127.0.0.1:8002"
+
+luaservice = root.."service/?.lua;" .. "./src/database/?.lua"
+start = "main"
+bootstrap = "snlua bootstrap"
+
+lualoader = root.. "lualib/loader.lua"
+cpath = root.."cservice/?.so"
+lua_path = "./src/database/?.lua;" .. root .. "lualib/?.lua;"
+lua_cpath = root .. "luaclib/?.so"
+
+DBHOST = "127.0.0.1"
+DBPORT = 27017
+DBNAME = "testdb"
+DBUSERNAME = "test"
+DBPASSWORD = "test"
