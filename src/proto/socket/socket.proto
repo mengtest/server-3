@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package socket;
+
+message socketReq {
+    string      service     = 1;    //服务名
+    string      body        = 2;    //参数
+}
+
+message socketResp {
+    int32       code        = 1;    //结果码
+    string      service     = 2;    //服务名
+    string      body        = 3;    //结果
+}
+
+message heartbeatReq {
+    int32       index       = 1;    //心跳索引
+}
+
+message heartbeatResp {
+    int32       code        = 1;    //结果码
+    int32       index       = 2;    //心跳索引
+}
