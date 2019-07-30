@@ -1,11 +1,11 @@
-local skynet = require("skynet")
+local skynet = require "skynet"
 
 local CMD = {}
 local SOCKET = {}
 local gate
 local agent = {}
 
-function SOCKET.open(fd, addr)
+function SOCKET.connect(fd, addr)
 	skynet.error("New client from : " .. addr)
 	agent[fd] = skynet.newservice("agent/agent")
 	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
@@ -21,7 +21,7 @@ local function close_agent(fd)
 	end
 end
 
-function SOCKET.close(fd)
+function SOCKET.disconnect(fd)
 	print("socket close",fd)
 	close_agent(fd)
 end
@@ -32,15 +32,19 @@ function SOCKET.error(fd, msg)
 end
 
 function SOCKET.warning(fd, size)
-	-- size K bytes havn't send out in fd
 	print("socket warning", fd, size)
 end
 
-function SOCKET.data(fd, msg)
+function SOCKET.data(fd, data)
+	local a = agent[fd]
+	if a then
+		skynet.call(a, "lua", "receiveData", data)
+	end
 end
 
 function CMD.start(conf)
-	skynet.call(gate, "lua", "open" , conf)
+	skynet.call(gate, "lua", "start", skynet.self())
+	skynet.call(gate, "lua", "open", conf)
 end
 
 function CMD.close(fd)
@@ -51,13 +55,12 @@ skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
 		if cmd == "socket" then
 			local f = SOCKET[subcmd]
-			f(...)
-			-- socket api don't need return
+			skynet.ret(skynet.pack(f(...)))
 		else
 			local f = assert(CMD[cmd])
 			skynet.ret(skynet.pack(f(subcmd, ...)))
 		end
 	end)
 
-	gate = skynet.newservice("gate")
+	gate = skynet.newservice("agent/gate")
 end)
