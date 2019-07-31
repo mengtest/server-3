@@ -55,13 +55,12 @@ function CMD.start(watchDog)
             skynet.call(watchDog, "lua", "socket", "data", id, str)
         else
             skynet.error("Drop message", str)
-            socket.drop(data, size)
         end
+        socket.drop(data, size)
     end
 
     -- SKYNET_SOCKET_TYPE_CONNECT = 2
     MSG[2] = function (id, _, addr)
-        skynet.error("new connect", id, addr)
     end
 
     -- SKYNET_SOCKET_TYPE_CLOSE = 3
@@ -76,7 +75,7 @@ function CMD.start(watchDog)
 
     -- SKYNET_SOCKET_TYPE_ACCEPT = 4
     MSG[4] = function (id, newId, addr)
-        print("connect", id, newId, addr)
+        skynet.error("New connect", id, newId, addr)
         if clientNum >= maxClientNum then
             socket.close(newId)
             return
@@ -102,7 +101,6 @@ function CMD.start(watchDog)
 
     -- SKYNET_SOCKET_TYPE_UDP = 6
     MSG[6] = function (id, size, data, addrs)
-        
     end
 
     -- SKYNET_SOCKET_TYPE_WARNING = 7

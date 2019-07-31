@@ -1,4 +1,5 @@
-local skynet = require "skynet"
+local skynet = require("skynet")
+require("skynet.manager")
 
 local CMD = {}
 local SOCKET = {}
@@ -62,5 +63,6 @@ skynet.start(function()
 		end
 	end)
 
+    skynet.register("watchdog")
 	gate = skynet.newservice("agent/gate")
 end)

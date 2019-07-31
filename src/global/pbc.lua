@@ -35,6 +35,7 @@ end
 function CMD.register(config)
     config = type(config) == "table" and config or {}
     for k,v in pairs(config) do
+        print(k, v)
         if not pbConfig[k] then
             pbConfig[k] = v
         else
@@ -55,7 +56,7 @@ end
 
 function CMD.start()
     for k, v in pairs(pbList) do
-        CMD.register(v)
+        CMD.register(v.protoConfig)
     end
 end
 

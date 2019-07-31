@@ -61,3 +61,5 @@ function M.packData(code, service, data)
     socketData = table.concat({packHeadPrefix, string.numToAscii(packVersion, 1), string.numToAscii(dataLen, 2), socketData})
     return socketData
 end
+
+return M
