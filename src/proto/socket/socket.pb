@@ -1,5 +1,5 @@
 
-¤
+…
 &src/frameworkEx/socket/pb/socket.protosocket"9
 	socketReq
 service (	Rservice
@@ -13,4 +13,9 @@ socketResp
 index (Rindex"9
 heartbeatResp
 code (Rcode
-index (Rindexbproto3
+index (Rindex"@
+loginReq
+account (	Raccount
+password (	Rpassword"
+	loginResp
+sid (Rsidbproto3

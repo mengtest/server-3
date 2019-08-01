@@ -3,18 +3,18 @@ thread = 4
 logger = nil
 harbor = 0
 
-luaservice = "./src/?.lua;./src/?/main.lua;" .. root .."service/?.lua"
+luaservice = "./src/?.lua;./src/?/main.lua;./src/game/?/main.lua;" .. root .."service/?.lua"
 start = "main"
 
 bootstrap = "snlua bootstrap"
 
 lualoader = root .. "lualib/loader.lua"
 cpath = root .. "cservice/?.so"
-lua_path = "./src/?.lua;" .. root .. "lualib/?.lua;"
+lua_path = "./src/?.lua;./src/game/?.lua;" .. root .. "lualib/?.lua;"
 lua_cpath = "./luaclib/?.so;" .. root .. "luaclib/?.so"
 
 DBHOST = "127.0.0.1"
 DBPORT = 27017
-DBNAME = "testdb"
-DBUSERNAME = "test"
-DBPASSWORD = "test"
+DBNAME = "basedb"
+DBUSERNAME = "base"
+DBPASSWORD = "base"

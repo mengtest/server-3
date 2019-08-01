@@ -7,13 +7,15 @@ local WATCHDOG
 local GATE
 local CLIENT
 
-local heartBeatIndex = 1
-
 local CMD = {}
+local lastTime
 
 local function heartBeat(service, data)
-	heartBeatIndex = data.index
-	CMD.sendData(0, service, {code = 0, index = heartBeatIndex})
+	if skynet.now() - lastTime > 18000 then	--只有心跳
+		CMD.close()
+		return
+	end
+	CMD.sendData(0, service, {code = 0, index = data.index})
 end
 
 function CMD.start(conf)
@@ -21,6 +23,12 @@ function CMD.start(conf)
 	GATE= conf.gate
 	WATCHDOG = conf.watchdog
 	skynet.call(GATE, "lua", "openClient", CLIENT)
+	lastTime = skynet.now()
+end
+
+function CMD.close()
+	CMD.sendData(0, service, {code = 0, index = 0})
+	skynet.call(GATE, "lua", "closeClient", CLIENT)
 end
 
 function CMD.disconnect()
@@ -33,8 +41,9 @@ function CMD.receiveData(data)
 		if v.service == "heartbeat" then
 			heartBeat(v.service, v.body)
 		else
+			lastTime = skynet.now()
 			local service, method = string.match(v.service, "^(.+)%.(.+)$")
-			skynet.send(v.service, "lua", skynet.self(), method, v.body)
+			local data = skynet.send(service, "lua", method, skynet.self(), v.body)
 		end
 	end
 end
@@ -47,7 +56,6 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		-- skynet.trace()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

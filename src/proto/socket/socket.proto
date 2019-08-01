@@ -21,3 +21,12 @@ message heartbeatResp {
     int32       code        = 1;    //结果码
     int32       index       = 2;    //心跳索引
 }
+
+message loginReq {
+    string      account     = 1;
+    string      password    = 2;
+}
+
+message loginResp {
+    int32       sid         = 1;      
+}
