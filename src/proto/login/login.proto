@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package login;
+
+message loginReq {
+    string      account     = 1;    //账号
+    string      password    = 2;    //密码或者token
+    int32       appversion  = 3;    //apk版本
+}
+
+message loginResp {
+    int32       code        = 1;    //结果码，0为成功，其他失败
+    string      msg         = 2;    //回复消息
+    accountInfo account     = 3;    //账号信息
+    userInfo    user        = 4;    //用户信息
+}
+
+message accountInfo {
+    string      token       = 1;    //token
+}
+
+message userInfo {
+    int32       uid         = 1;    //用户id
+    string      nick        = 2;    //昵称
+}

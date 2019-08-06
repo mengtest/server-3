@@ -9,7 +9,7 @@ local agent = {}
 function SOCKET.connect(fd, addr)
 	skynet.error("New client from : " .. addr)
 	agent[fd] = skynet.newservice("agent/agent")
-	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
+	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self(), addr = string.match(addr, "^(.+):")})
 end
 
 local function close_agent(fd)

@@ -35,7 +35,6 @@ end
 function CMD.register(config)
     config = type(config) == "table" and config or {}
     for k,v in pairs(config) do
-        print(k, v)
         if not pbConfig[k] then
             pbConfig[k] = v
         else
@@ -46,12 +45,18 @@ end
 
 function CMD.encode(pbKey, data)
     local proto = _getProto(msgType.response, pbKey)
-    return pb.encode(proto, data)
+    if proto and data then
+        return pb.encode(proto, data)
+    end
+    return ""
 end
 
 function CMD.decode(pbKey, data)
     local proto = _getProto(msgType.request, pbKey)
-    return pb.decode(proto, data)
+    if proto and data then
+        return pb.decode(proto, data)
+    end
+    return ""
 end
 
 function CMD.start()
