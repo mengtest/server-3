@@ -9,16 +9,16 @@ local connection = {}
 
 local CMD = {}
 
-function CMD.openClient(fd)
-    if connection[fd] then
-        socket.start(fd)
+function CMD.openClient(id)
+    if connection[id] then
+        socket.start(id)
     end
 end
 
-function CMD.closeClient(fd)
-    if connection[fd] then
-        connection[fd] = false
-        socket.close(fd)
+function CMD.closeClient(id)
+    if connection[id] then
+        connection[id] = false
+        socket.close(id)
     end
 end
 
@@ -68,7 +68,7 @@ function CMD.start(watchDog)
         if id == socketId then
             socketId = nil
         else
-            skynet.call(watchDog, "lua", "socket", "disconnect", id)
+            skynet.call(watchDog, "lua", "socket", "disConnect", id)
             close(id)
         end
     end
@@ -121,8 +121,6 @@ end
 skynet.start(function()
     skynet.dispatch("lua", function(_, _, cmd, ...)
         local f = CMD[cmd]
-        if f then
-            skynet.ret(skynet.pack(f(...)))
-        end
+        skynet.ret(skynet.pack(f(...)))
     end)
 end)

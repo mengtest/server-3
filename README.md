@@ -1,1 +1,1 @@
-server
+##test skynet server

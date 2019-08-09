@@ -42,10 +42,10 @@ function M.parseData(data)
     return datas
 end
 
-function M.packData(code, msg, service, data, secret)
-    assert(service, "Service name must exist")
-    local serviceData = skynet.call("pbc", "lua", "encode", service, data)
-    local socketData = skynet.call("pbc", "lua", "encode", "socket", {code = code, msg = msg, service = service, body = serviceData, secret = secret})
+function M.packData(params)
+    assert(params.service, "Service name must exist")
+    local serviceData = skynet.call("pbc", "lua", "encode", params.service, params.data)
+    local socketData = skynet.call("pbc", "lua", "encode", "socket", {code = params.code, msg = params.msg, service = params.service, body = serviceData, secret = params.secret})
     local dataLen = packHeadLen + string.len(socketData)
     if dataLen > 65535 then
         print("data is too long, max len is 2^16 - 1")

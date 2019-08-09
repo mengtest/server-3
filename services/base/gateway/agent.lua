@@ -1,20 +1,23 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
-local parse = require("agent.socketDataParse")
+local parse = require("dataparser")
 require("utils.globalFunc")
 
 local WATCHDOG
 local GATE
 local CLIENT
-local ADDRESS
 
 local code = {
 	SUCCESS = 0,
-	ERROR_SECRET = 1,
+	ERROR_SECRET = 1
 }
 
 local CMD = {}
 local lastTime
+
+local function sendData(code, msg, service, data, secret)
+	local sendData = parser.packData({code = code, msg = msg, })
+end
 
 local function heartBeat(service, data)
 	if skynet.now() - lastTime > 60000 then	--10分钟只有心跳
@@ -34,7 +37,6 @@ function CMD.start(conf)
 	CLIENT = conf.client
 	GATE= conf.gate
 	WATCHDOG = conf.watchdog
-	ADDRESS = conf.addr
 	skynet.call(GATE, "lua", "openClient", CLIENT)
 	lastTime = skynet.now()
 end
@@ -75,10 +77,6 @@ end
 
 function CMD.sendData(service, data)
 	sendData(code.SUCCESS, "", service, data)
-end
-
-function CMD.getAddress()
-	return ADDRESS
 end
 
 skynet.start(function()
