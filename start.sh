@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./skynet/skynet configs/config
+./3rd/skynet/skynet configs/config

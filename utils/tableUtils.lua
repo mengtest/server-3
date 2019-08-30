@@ -1,6 +1,7 @@
+local type = type
 --[[
     @desc: 判断表是否为空
-    author:{author}
+    author:Bogey
     time:2019-02-12 14:59:21
     --@tb: 
     @return:
@@ -13,8 +14,23 @@ function table.isEmpty(tb)
 end
 
 --[[
+    @desc: 获取表长度
+    author:Bogey
+    time:2019-08-12 15:54:54
+    --@t: 
+    @return:
+]]
+function table.size(t)
+    local count = 0
+    for k, v in pairs(t) do
+        count = count + 1
+    end
+    return count
+end
+
+--[[
     @desc: 获取表里指定字段的所有值
-    author:BogeyRuan
+    author:Bogey
     time:2019-06-17 15:33:28
     --@hashtable:
 	--@key: 
@@ -32,7 +48,7 @@ end
 
 --[[
     @desc: 顺序遍历不连续hash表
-    author:BogeyRuan
+    author:Bogey
     time:2019-06-17 15:37:25
     --@tb: 
     @return: 迭代器
@@ -52,7 +68,7 @@ end
 
 --[[
     @desc: 返回表内最大的值
-    author:BogeyRuan
+    author:Bogey
     time:2019-06-21 12:18:22
     --@tb: 
     @return:
@@ -70,7 +86,7 @@ end
 
 --[[
     @desc: 返回表内最小的值
-    author:BogeyRuan
+    author:Bogey
     time:2019-06-21 12:18:40
     --@tb: 
     @return:
@@ -88,7 +104,7 @@ end
 
 --[[
     @desc: 返回表里的最大最小值
-    author:BogeyRuan
+    author:Bogey
     time:2019-06-25 16:16:22
     --@tb: 
     @return:
@@ -108,8 +124,8 @@ function table.maxMin(tb)
 end
 
 --[[
-    @desc: 用B表去填充A表
-    author:BogeyRuan
+    @desc: 用B表去填充A表，无覆盖
+    author:Bogey
     time:2019-07-09 10:26:28
     --@tbA:
 	--@tbB: 
@@ -121,4 +137,46 @@ function table.fill(tbA, tbB)
             tbA[k] = v
         end
     end
+end
+
+--[[
+    @desc: 把B表合并到A表，覆盖相同的键
+    author:Bogey
+    time:2019-08-26 10:30:16
+    --@tbA:
+	--@tbB: 
+    @return:
+]]
+function table.merge(tbA, tbB)
+    for k,v in pairs(tbB) do
+        tbA[k] = v
+    end
+end
+
+--[[
+    @desc: 比较两个table是否值相同
+    author:Bogey
+    time:2019-08-26 16:22:38
+    --@tbA:
+	--@tbB: 
+    @return:
+]]
+function table.equal(tbA, tbB)
+    assert(type(tbA) == "table" and type(tbB) == "table")
+    if table.size(tbA) ~= table.size(tbB) then return false end
+    for k,v in pairs(tbA) do
+        if type(tbB[k]) ~= type(v) then
+            return false
+        end
+        if type(v) == "table" then
+            if not table.equal(v, tbB[k]) then
+                return false
+            end
+        else
+            if not (v == tbB[k]) then
+                return false
+            end
+        end
+    end
+    return true
 end

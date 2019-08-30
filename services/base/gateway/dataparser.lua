@@ -1,6 +1,6 @@
 local skynet = require("skynet")
-require("utils.stringUtils")
-require("utils.tableUtils")
+require("stringUtils")
+require("tableUtils")
 
 --包结构
 --| len:65535           | body:string |

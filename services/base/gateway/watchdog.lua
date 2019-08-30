@@ -1,4 +1,5 @@
 local skynet = require("skynet")
+require("skynet.manager")
 
 local SOCKET = {}
 local CMD = {}
@@ -42,7 +43,7 @@ end
 
 function CMD.start()
     skynet.call(gate, "lua", "start", skynet.self())
-    skynet.call(gate, "lua", "open", {nodelay = true}))
+    skynet.call(gate, "lua", "open", {nodelay = true})
 end
 
 function CMD.close(id)
@@ -59,6 +60,8 @@ skynet.start(function()
             skynet.ret(skynet.pack(f(subcmd, ...)))
         end
     end)
+
+    skynet.register("watchdog")
     
-    gate = skynet.newservice("gate")
+    gate = skynet.newservice("base/gateway/gate")
 end)

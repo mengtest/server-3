@@ -1,6 +1,5 @@
 local skynet = require("skynet")
-require("skynet.manager")
-require("utils.globalFunc")
+require("globalFunc")
 
 local CMD = {}
 
@@ -92,6 +91,4 @@ skynet.start(function ()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
     end)
-    
-    skynet.register("api-login")
 end)

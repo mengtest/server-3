@@ -1,7 +1,7 @@
 local skynet = require("skynet")
 require("skynet.manager")
 local pb = require("pb")
-local pbList = require("proto.pbList")
+local pbList = require("pbConfig")
 
 local CMD = {}
 

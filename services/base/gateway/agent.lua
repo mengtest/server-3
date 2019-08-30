@@ -1,7 +1,7 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
-local parse = require("dataparser")
-require("utils.globalFunc")
+local parse = require("base.gateway.dataparser")
+require("globalFunc")
 
 local WATCHDOG
 local GATE

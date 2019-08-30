@@ -1,4 +1,4 @@
-local socketPb = "./src/proto/socket/socket.pb"
+local socketPb = "/proto/socket/socket.pb"
 local socketPkg = "socket"
 
 local config = {}

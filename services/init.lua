@@ -1,6 +1,7 @@
 local skynet = require("skynet")
 
 skynet.start(function()
-    skynet.uniqueservice(true, "status")
+    skynet.newservice("base/init")
+    skynet.newservice("game/init")
     skynet.exit()
 end)

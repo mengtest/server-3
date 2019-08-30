@@ -1,9 +1,9 @@
 local skynet = require("skynet")
 require("skynet.manager")
+local serviceConfig = require("base.status.serviceConfig")
 
 local services = {}
-local serviceStatus = {}
-local serviceMethods = {}
+local users = {}
 
 local code = {
     SUCCESS = 0,
@@ -12,42 +12,31 @@ local code = {
     ERROR_SERVICE = 3
 }
 
-local function timeoutCall(func, service, ...)
+local function timeoutCall(func, ...)
     local co = coroutine.running()
     local result = false
-    skynet.fork(function (service, ...)
-        result = table.pack(pacll(func, service, ...))
+    skynet.fork(function (...)
+        result = table.pack(pacll(...))
         if co then
             skynet.wakeup(co)
         end
-    end, service, ...)
+    end, func, ...)
 
     skynet.sleep(300, co)
     co = nil
     return result
 end
 
-local function checkServiceAlive(service, serviceName)
-    local result = timeoutCall(function(...)
-        skynet.queryservice(true, ...)
-    end, service)
-    if result and #result > 0 then
-        serviceStatus[serviceName] = true
-    else
-        serviceStatus[serviceName] = false
-    end
-    return serviceStatus[serviceName]
-end
-
 local function closeService(serviceName)
     local service = services[serviceName]
-    if service and checkServiceAlive(service, serviceName) then
+    if service then
         skynet.kill(service)
     end
+    services[serviceName] = nil
 end
 
-local function ckechServiceMethod(serviceName, methodName)
-    local methods = serviceMethods[serviceName]
+local function checkServiceMethod(serviceName, methodName)
+    local methods = serviceConfig.serviceMethod[serviceName]
     if type(methods) == "table" then
         for i, v in ipairs(methods) do
             if methodName == v then
@@ -73,20 +62,13 @@ end
 
 local CMD = {}
 
-function CMD.registerService(service, serviceName, methods)
+function CMD.registerService(service, serviceName)
     closeService(serviceName)
     services[serviceName] = service
-    serviceMethods[serviceName] = methods
-end
-
-function CMD.unRegisterService(serviceName)
-    closeService(serviceName)
-    services[serviceName] = nil
-    serviceMethods[serviceName] = {}
 end
 
 function CMD.callServiceSafeMethod(serviceName, methodName, ...)
-    local bool, ret = ckechServiceMethod(serviceName, methodName)
+    local bool, ret = checkServiceMethod(serviceName, methodName)
     if bool then
         return callServiceMethod(serviceName, methodName, ...)
     else
@@ -98,10 +80,26 @@ function CMD.callServiceMethod(serviceName, methodName, ...)
     return callServiceMethod(serviceName, methodName, ...)
 end
 
+function CMD.changeUserStatus(id, status)
+    users[id] = onlineStatus[status]
+end
+
+function CMD.getUserStatusById(id)
+    return users[id] or onlineStatus.offline
+end
+
+function CMD.getUserStatusByIds(ids)
+    local result = {}
+    for _, v in pairs(ids) do
+        result[v] = CMD.getUserStatusById(v)
+    end
+end
+
 skynet.start(function()
     skynet.dispatch("lua", function(session, source, cmd, ...)
         local f = CMD[cmd]
         skynet.ret(skynet.pack(f(...)))
     end)
+
     skynet.register("status")
 end)

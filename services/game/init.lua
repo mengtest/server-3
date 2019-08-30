@@ -1,6 +1,6 @@
 local skynet = require("skynet")
 
 skynet.start(function()
-    skynet.uniqueservice(true, "login/login")
-	skynet.exit()
+    skynet.newservice("game/login")
+    skynet.exit()
 end)

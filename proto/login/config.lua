@@ -1,4 +1,4 @@
-local loginPb = "./src/proto/login/login.pb"
+local loginPb = "./proto/login/login.pb"
 local loginPkg = "login"
 
 local config = {}
