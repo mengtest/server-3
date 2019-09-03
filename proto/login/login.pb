@@ -1,6 +1,6 @@
 
-õ
-$src/app/data/login/proto/login.protologin"`
+è
+proto/login/login.protologin"`
 loginReq
 account (	Raccount
 password (	Rpassword

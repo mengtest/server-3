@@ -1,35 +1,19 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
 local parse = require("base.gateway.dataparser")
-require("globalFunc")
+require("utils.globalFunc")
+require("utils.stringUtils")
+require("utils.tableUtils")
 
 local WATCHDOG
 local GATE
 local CLIENT
-
-local code = {
-	SUCCESS = 0,
-	ERROR_SECRET = 1
-}
+local UID
 
 local CMD = {}
-local lastTime
 
-local function sendData(code, msg, service, data, secret)
-	local sendData = parser.packData({code = code, msg = msg, })
-end
-
-local function heartBeat(service, data)
-	if skynet.now() - lastTime > 60000 then	--10分钟只有心跳
-		CMD.close()
-		return
-	end
-	CMD.sendData(service, {code = 0, index = data.index})
-end
-
-local function sendData(code, msg, service, data, secret)
-	dump(data)
-	data = parse.packData(code, msg, service, data, secret)
+local function sendData(code, service, data)
+	data = parse.packData(code, service, data)
 	socket.send(CLIENT, data)
 end
 
@@ -37,46 +21,34 @@ function CMD.start(conf)
 	CLIENT = conf.client
 	GATE= conf.gate
 	WATCHDOG = conf.watchdog
-	skynet.call(GATE, "lua", "openClient", CLIENT)
-	lastTime = skynet.now()
 end
 
-function CMD.close()
-	-- CMD.sendData(0, service, {code = 0, index = 0})
-	skynet.call(GATE, "lua", "closeClient", CLIENT)
+function CMD.bindUser(uid, client)
+	UID = uid
+	CLIENT = client
+	return true
 end
 
-function CMD.disconnect()
+function CMD.exit()
 	skynet.exit()
 end
 
 function CMD.receiveData(data)
+	skynet.error("----------------------------------------agent", CLIENT)
 	local datas = parse.parseData(data)
-	dump(datas)
 	for i,v in ipairs(datas) do
-		if v.service == "heartbeat" then
-			heartBeat(v.service, v.body)
+		local serviceName, methodName = string.match(v.service, "^(.+)%.(.+)$")
+		if serviceName == "socket" then
+		
 		else
-			lastTime = skynet.now()
-			if v.service == "api-login.login" then
-				local secret, loginData = skynet.call("api-login", "lua", "login", skynet.self(), v.body)
-				if secret then
-					sendData(code.SUCCESS, "", v.service, loginData, secret)
-				else
-					sendData(code.ERROR_SECRET, "", v.service)
-				end
-			elseif not v.secret or v.secret == "" then
-				local service, method = string.match(v.service, "^(.+)%.(.+)$")
-				sendData(code.ERROR_SECRET, "Secret is empty", service, {})
-			else
-
-			end
+			local code, ret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, skynet.self(), v.body)
+			sendData(code, v.service, ret)
 		end
 	end
 end
 
-function CMD.sendData(service, data)
-	sendData(code.SUCCESS, "", service, data)
+function CMD.getAddress()
+	return skynet.call(WATCHDOG, "lua", "getAddressById", CLIENT)
 end
 
 skynet.start(function()

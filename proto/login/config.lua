@@ -4,7 +4,7 @@ local loginPkg = "login"
 local config = {}
 
 config.method = {
-    LOGIN = "api-login.login"
+    LOGIN = "login.login"
 }
 
 config.protoConfig = {

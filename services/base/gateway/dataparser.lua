@@ -1,6 +1,6 @@
 local skynet = require("skynet")
-require("stringUtils")
-require("tableUtils")
+require("utils.stringUtils")
+require("utils.tableUtils")
 
 --包结构
 --| len:65535           | body:string |
@@ -29,7 +29,7 @@ function M.parseData(data)
     data = cacheData .. data
     local bool, body = checkDataPack(data)
     while bool do
-        local socketData = skynet.call("pbc", "lua", "decode", "socket", body)
+        local socketData = skynet.call("pbc", "lua", "decode", "socket.socket", body)
         if not table.isEmpty(socketData) then
             local serviceData = skynet.call("pbc", "lua", "decode", socketData.service, socketData.body)
             socketData.body = serviceData
@@ -42,10 +42,10 @@ function M.parseData(data)
     return datas
 end
 
-function M.packData(params)
-    assert(params.service, "Service name must exist")
-    local serviceData = skynet.call("pbc", "lua", "encode", params.service, params.data)
-    local socketData = skynet.call("pbc", "lua", "encode", "socket", {code = params.code, msg = params.msg, service = params.service, body = serviceData, secret = params.secret})
+function M.packData(code, service, data, secret)
+    assert(service, "Service name must exist")
+    local serviceData = skynet.call("pbc", "lua", "encode", service, data)
+    local socketData = skynet.call("pbc", "lua", "encode", "socket.socket", {code = code, service = service, body = serviceData, secret = secret})
     local dataLen = packHeadLen + string.len(socketData)
     if dataLen > 65535 then
         print("data is too long, max len is 2^16 - 1")

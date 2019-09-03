@@ -1,5 +1,4 @@
-require("stringUtils")
-require("tableUtils")
+require("utils.stringUtils")
 
 --[[
     @desc: 校验为数字

@@ -297,3 +297,17 @@ function string.split(input, delimiter)
     return arr
 end
 
+function string.uuid(time, address)
+    local chars = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","1","2","3","4","5","6","7","8","9","0"}
+    local function getRandomChar()
+        return chars[math.random(1, #chars)]
+    end
+    local uuid = ""
+    for i, v in ipairs({time, address}) do
+        math.randomseed(v)
+        for i = 1, 16 do
+            uuid = uuid .. getRandomChar()
+        end
+    end
+    return uuid
+end
