@@ -26,7 +26,6 @@ local function closeConnect(id)
         socketIds[id] = nil
         socketAddrs[id] = nil
     end
-    dump(socketIds)
 end
 
 local function closeAgent(id)
