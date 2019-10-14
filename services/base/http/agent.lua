@@ -5,6 +5,7 @@ local sockethelper = require("http.sockethelper")
 local urllib = require("http.url")
 require("utils.globalFunc")
 require("utils.stringUtils")
+require("utils.fileUtils")
 
 local CMD = {}
 
@@ -15,7 +16,19 @@ local function response(id, ...)
 	end
 end
 
-function CMD.update()
+function CMD.update(url, query, header, body)
+    print(url)
+    if string.isEmpty(url) then
+        return 200, "http://192.168.220.130:8001/update"
+    else
+        local path = "files/update" .. url
+        local content = io.readfile(path)
+        if content then
+            return 200, content
+        else
+            return 404
+        end
+    end
 end
 
 function CMD.upload(url, query, header, body)
@@ -50,10 +63,13 @@ function CMD.upload(url, query, header, body)
         if not string.isEmpty(ext) then
             ext = "." .. ext
         end
-        local path = table.concat({"upload/", parseData.type, "/", fileName, "_", string.uuid(os.time()), ext})
-        local file = io.open(path, "w")
-        file:write(parseData.fileData)
-        file:close()
+        fileName = table.concat({fileName, "_", string.uuid(os.time()), ext})
+        local dir = table.concat({"files/upload/", parseData.type, "/"})
+        if not io.exists(dir) then
+            io.mkdir(dir)
+        end
+        io.writefile(dir .. fileName, parseData.fileData)
+        return 200, fileName
     end
 end
 

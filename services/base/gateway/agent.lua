@@ -23,8 +23,7 @@ function CMD.start(conf)
 	WATCHDOG = conf.watchdog
 end
 
-function CMD.bindUser(uid, client)
-	UID = uid
+function CMD.bindUser(secret, client)
 	CLIENT = client
 	return true
 end

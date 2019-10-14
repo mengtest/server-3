@@ -50,10 +50,8 @@ function CMD.login(agent, data, address, newsecret)
         local bool = true
         if userInc then
             sid = userInc.value + 1
-            bool = skynet.call("mongo", "lua", "update", "increase", {key = "users"}, {key = "users", value = sid})
-        else
-            bool = skynet.call("mongo", "lua", "insert", "increase", {key = "users", value = 1})
         end
+        bool = skynet.call("mongo", "lua", "update", "increase", {key = "users"}, {key = "users", value = sid}, true)
 
         local loginTime = os.time()
         local addNum = string.gsub(address, "%.", "")

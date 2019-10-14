@@ -47,7 +47,7 @@ local function cleanUnUsedAgent()
         return false
     end
 
-    local cleanTime = 360000
+    local cleanTime = 60000 --10min
 
     while true do
         skynet.sleep(cleanTime)

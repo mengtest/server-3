@@ -34,14 +34,14 @@ end
 
 function CMD.receiveData(data, client, address)
 	local datas = parse.parseData(data)
-	dump(datas)
+    dump(datas)
 	for i,v in ipairs(datas) do
         local serviceName, methodName = string.match(v.service, "^(.+)%.(.+)$")
 		if serviceName == "socket" then
             if methodName == "reconnect" then
                 local newsecret = string.uuid(skynet.now(), tonumber(string.gsub(string.match(address, "^(.+):%d+$"), "%.", ""), 10))
                 local agent, isNew = skynet.call(WATCHDOG, "lua", "updateSocketBindAgent", client, v.body.secret)
-                local ret = skynet.call(agent, "lua", "bindUser", v.body.uid, client)
+                local ret = skynet.call(agent, "lua", "bindUser", v.body.secret, client)
                 if ret then
                     skynet.call(WATCHDOG, "lua", "updateAgentBindSocket", client, newsecret)
                     sendData(client, serviceErrorCode.SUCCESS, v.service, {code = 0, secret = newsecret})
@@ -54,9 +54,9 @@ function CMD.receiveData(data, client, address)
             local newsecret = string.uuid(skynet.now(), tonumber(string.gsub(string.match(address, "^(.+):%d+$"), "%.", ""), 10))
             local code, ret, secret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, skynet.self(), v.body, address, newsecret)
             local agent = skynet.call(WATCHDOG, "lua", "updateSocketBindAgent", client, secret)
-            skynet.call(agent, "lua", "bindUser", ret.user.uid, client)
+            skynet.call(agent, "lua", "bindUser", newsecret, client)
             skynet.call(WATCHDOG, "lua", "updateAgentBindSocket", client, newsecret)
-            sendData(client, code, v.service, ret, secret)
+            sendData(client, code, v.service, ret, newsecret)
         elseif isPublicService(serviceName) then
             local code, ret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, skynet.self(), v.body, address)
             sendData(client, code, v.service, ret)
