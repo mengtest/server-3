@@ -15,4 +15,4 @@ eachDir(){
         fi
     done
 }
-eachDir ./proto
+eachDir ./src/proto

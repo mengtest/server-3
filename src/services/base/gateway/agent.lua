@@ -1,14 +1,11 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
 local parse = require("base.gateway.dataparser")
-require("utils.globalFunc")
-require("utils.stringUtils")
-require("utils.tableUtils")
+require("utils.functions")
 
 local WATCHDOG
 local GATE
 local CLIENT
-local UID
 
 local CMD = {}
 
@@ -21,6 +18,7 @@ function CMD.start(conf)
 	CLIENT = conf.client
 	GATE= conf.gate
 	WATCHDOG = conf.watchdog
+	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
 
 function CMD.bindUser(secret, client)

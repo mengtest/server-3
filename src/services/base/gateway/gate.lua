@@ -9,16 +9,17 @@ local connection = {}
 
 local CMD = {}
 
-function CMD.openClient(id)
-    if connection[id] then
-        socket.start(id)
+function CMD.closeClient(fd)
+    if connection[fd] then
+        connection[fd] = nil
+        clientNum = clientNum - 1
+        socket.close(fd)
     end
 end
 
-function CMD.closeClient(id)
-    if connection[id] then
-        connection[id] = false
-        socket.close(id)
+function CMD.forward(fd, agent)
+    if connection[fd] then
+        connection[fd].agent = agent
     end
 end
 
@@ -38,21 +39,21 @@ function CMD.open(conf)
 end
 
 function CMD.start(watchDog)
-    local function close(id)
-        local c = connection[id]
-        if c ~= nil then
-            connection[id] = nil
-            clientNum = clientNum - 1
-        end
+    local function close(fd)
+        CMD.closeClient(fd)
     end
 
     local MSG = {}
 
     -- SKYNET_SOCKET_TYPE_DATA = 1
-    MSG[1] = function (id, size, data)
+    MSG[1] = function (fd, size, data)
         local str = skynet.tostring(data, size)
-        if connection[id] then
-            skynet.call(watchDog, "lua", "socket", "data", id, str)
+        if connection[fd] then
+            if connection[fd].agent then
+                skynet.send(connection[fd].agent, "lua", "receiveData", str)
+            else
+                skynet.send(watchDog, "lua", "socket", "data", fd, str)
+            end
         else
             skynet.error("Drop message", str)
         end
@@ -60,52 +61,56 @@ function CMD.start(watchDog)
     end
 
     -- SKYNET_SOCKET_TYPE_CONNECT = 2
-    MSG[2] = function (id, _, addr)
+    MSG[2] = function (fd, _, addr)
     end
 
     -- SKYNET_SOCKET_TYPE_CLOSE = 3
-    MSG[3] = function (id)
-        if id == socketId then
+    MSG[3] = function (fd)
+        if fd == socketId then
             socketId = nil
         else
-            skynet.call(watchDog, "lua", "socket", "disConnect", id)
-            close(id)
+            skynet.send(watchDog, "lua", "socket", "disConnect", fd)
+            close(fd)
         end
     end
 
     -- SKYNET_SOCKET_TYPE_ACCEPT = 4
-    MSG[4] = function (id, newId, addr)
-        skynet.error("New connect", id, newId, addr)
+    MSG[4] = function (fd, newFd, addr)
+        skynet.error("New connect", fd, newFd, addr)
         if clientNum >= maxClientNum then
-            socket.close(newId)
+            socket.close(newFd)
             return
         end
         if nodelay then
-            socket.nodelay(newId)
+            socket.nodelay(newFd)
         end
-        connection[newId] = true
+        connection[newFd] = {
+            fd = newFd,
+            addr = addr
+        }
         clientNum = clientNum + 1
-        skynet.call(watchDog, "lua", "socket", "connect", newId, addr)
+        socket.start(newFd)
+        skynet.send(watchDog, "lua", "socket", "connect", newId, addr)
     end
 
     -- SKYNET_SOCKET_TYPE_ERROR = 5
-    MSG[5] = function (id, _, error)
-        if id == socketId then
+    MSG[5] = function (fd, _, error)
+        if fd == socketId then
             socket.close(socketId)
             skynet.error("socket close", error)
         else
-            skynet.call(watchDog, "lua", "socket", "error", id, error)
-            close(id)
+            skynet.send(watchDog, "lua", "socket", "error", fd, error)
+            close(fd)
         end
     end
 
     -- SKYNET_SOCKET_TYPE_UDP = 6
-    MSG[6] = function (id, size, data, addrs)
+    MSG[6] = function (fd, size, data, addrs)
     end
 
     -- SKYNET_SOCKET_TYPE_WARNING = 7
-    MSG[7] = function (id, size)
-        skynet.call(watchDog, "lua", "socket", "warning", id, size)
+    MSG[7] = function (fd, size)
+        skynet.send(watchDog, "lua", "socket", "warning", fd, size)
     end
 
     skynet.register_protocol {

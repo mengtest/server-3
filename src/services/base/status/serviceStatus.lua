@@ -1,9 +1,8 @@
 local skynet = require("skynet")
 require("skynet.manager")
-local serviceConfig = require("configs.serviceConfig")
-local serviceErrorCode = require("configs.errorConfig").serviceErrorCode
-require("utils.tableUtils")
-require("utils.globalFunc")
+local serviceConfig = require("config.serviceConfig")
+local serviceErrorCode = require("config.errorConfig").serviceErrorCode
+require("framework.functions")
 
 local services = {}
 

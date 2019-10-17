@@ -1,4 +1,4 @@
-local path = ""
+local path = "proto."
 
 local config = {
     socket = require(path .. "socket.config"),

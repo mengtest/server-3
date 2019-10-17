@@ -3,14 +3,14 @@ thread = 4
 logger = nil
 harbor = 0
 
-luaservice = "./services/?.lua;./services/?/init.lua;" .. root .."service/?.lua"
+luaservice = "./src/services/?.lua;./src/services/?/init.lua;./src/?.lua;" .. root .."service/?.lua"
 start = "init"
 
 bootstrap = "snlua bootstrap"
 lualoader = root .. "lualib/loader.lua"
 
 cpath = root .. "cservice/?.so"
-lua_path = "./?.lua;./proto/?.lua;./services/?.lua;./services/?/init.lua;" .. root .. "lualib/?.lua;"
+lua_path = "./src/services/?.lua;./src/services/?/init.lua;./src/?.lua;" .. root .. "lualib/?.lua;"
 lua_cpath = "./luaclib/?.so;" .. root .. "luaclib/?.so"
 
 DBHOST = "127.0.0.1"

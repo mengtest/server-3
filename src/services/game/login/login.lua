@@ -1,5 +1,5 @@
 local skynet = require("skynet")
-require("utils.stringUtils")
+require("framework.functions")
 
 local CMD = {}
 
@@ -8,42 +8,39 @@ local code = {
 	FAILED = 1,
 }
 
-local function errorback()
+local function errorback(msg)
     return {
         code = code.FAILED,
-        msg = ""
+        msg = msg
     }
 end
 
-function CMD.login(agent, data, address, newsecret)
-    address = address or skynet.call(agent, "lua", "getAddress")
-    address = string.match(address, "^(.+):%d+$")
+function CMD.login(agent, data, address)
     local account = data.account
+    local msg = ""
     if string.isEmpty(account) then
-        return errorback()
+        return errorback("account is nil")
     end
-    local password = data.password or ""
 
+    local password = checkstring(data.password)
     local user = skynet.call("mongo", "lua", "findOne", "users", {account = account})
     if user then
-        if user.password == password or user.token == password then
+        if password == "" or user.password == password then
             local loginTime = os.time()
-            local addNum = string.gsub(address, "%.", "")
-            local token = string.uuid(loginTime, tonumber(addNum))
-            local oldsecret = user.secret
+            local token = string.uuid(address)
             user.token = token
             user.loginTime = loginTime
             user.address = address
-            user.secret = newsecret or oldsecret
             if skynet.call("mongo", "lua", "update", "users", {account = account}, user) then
                 return {
                     code = code.SUCCESS,
                     msg = "",
                     account = {token = token},
                     user = {uid = user.uid, nick = user.nick}
-                }, oldsecret
+                }
             end
         end
+        msg = "password is error"
     else
         local userInc = skynet.call("mongo", "lua", "findOne", "increase", {key = "users"})
         local sid = 1
