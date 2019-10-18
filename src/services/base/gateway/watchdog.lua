@@ -27,32 +27,7 @@ local function closeAgent(fd)
 end
 
 local function cleanUnUsedAgent()
-    local function isInSocketIds(value)
-        for k, v in pairs(socketIds) do
-            if v == value then
-                return true
-            end
-        end
-        return false
-    end
-
-    local cleanTime = 60000 --10min
-
-    while true do
-        skynet.sleep(cleanTime)
-        local time = skynet.now()
-        for k, v in pairs(agentsInfo) do
-            if not isInSocketIds(k) then
-                if time - v.time > cleanTime then
-                    skynet.send(agents[k], "lua", "exit")
-                    agents[k] = nil
-                    agentsInfo[k] = nil
-                end
-            end
-        end
-    end
 end
-
 
 function SOCKET.connect(fd, addr)
     agents[fd] = {

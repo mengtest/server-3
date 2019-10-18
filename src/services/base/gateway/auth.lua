@@ -1,7 +1,7 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
 local parse = require("base.gateway.dataparser").new()
-local code = require("config.codeConfig")
+local code = require("config.codeConfig").serviceErrorCode
 require("framework.functions")
 
 local WATCHDOG
@@ -11,7 +11,7 @@ local CMD = {}
 
 local function sendData(client, service, code, data)
 	dump(data)
-	data = parse.packData(code, service, data)
+    data = parse.packData(code, service, data)
 	socket.send(client, data)
 end
 
@@ -29,13 +29,17 @@ function CMD.receiveData(data, client, addr)
 		if serviceName == "socket" then
             if methodName == "auth" then
                 local secret = string.uuid()
-                sendData(client, v.service, code.serviceErrorCode.SUCCESS, {code = 0, secret = secret})
-                skynet.(WATCHDOG, "lua", "bindClient", client, secret, params.secret)
+                sendData(client, v.service, code.SUCCESS, {code = 0, secret = secret})
+                skynet.call(WATCHDOG, "lua", "bindClient", client, secret, params.secret)
             end
         elseif serviceName == "login" and methodName == "login" then
-            sendData(client, v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, params, client, addr))
+            local cd, ret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, skynet.self(), params, addr)
+            if cd == code.SUCCESS and ret.code == 0 then
+                skynet.call(WATCHDOG, "lua", "bindAgent", client)
+            end
+            sendData(client, v.service, cd, ret)
         else
-            sendData(client, v.service, code.serviceErrorCode.ERROR_PARAM)
+            sendData(client, v.service, code.ERROR_PARAM)
         end
 	end
 end

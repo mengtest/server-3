@@ -22,7 +22,7 @@ function CMD.login(agent, data, address)
         return errorback("account is nil")
     end
 
-    local password = checkstring(data.password)
+    local password = data.password
     local user = skynet.call("mongo", "lua", "findOne", "users", {account = account})
     if user then
         if password == "" or user.password == password then

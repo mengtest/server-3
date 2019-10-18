@@ -1,6 +1,6 @@
 
-è
-proto/login/login.protologin"`
+ì
+src/proto/login/login.protologin"`
 loginReq
 account (	Raccount
 password (	Rpassword

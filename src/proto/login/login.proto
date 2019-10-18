@@ -4,7 +4,7 @@ package login;
 
 message loginReq {
     string      account     = 1;    //账号
-    string      password    = 2;    //密码或者token
+    string      password    = 2;    //密码或者空
     int32       appversion  = 3;    //apk版本
 }
 
@@ -15,7 +15,7 @@ message loginResp {
     userInfo    user        = 4;    //用户信息
 }
 
-message accountInfo {
+message accountInfo {               //账号封禁信息等
     string      token       = 1;    //token
 }
 

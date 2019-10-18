@@ -90,7 +90,7 @@ function CMD.start(watchDog)
         }
         clientNum = clientNum + 1
         socket.start(newFd)
-        skynet.send(watchDog, "lua", "socket", "connect", newId, addr)
+        skynet.send(watchDog, "lua", "socket", "connect", newFd, addr)
     end
 
     -- SKYNET_SOCKET_TYPE_ERROR = 5
