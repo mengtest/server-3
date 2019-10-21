@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 eachDir(){
     for file in $1/*
     do
