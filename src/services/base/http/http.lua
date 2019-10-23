@@ -3,7 +3,7 @@ local socket = require("skynet.socket")
 
 skynet.start(function()
     local agents = {}
-	for i= 1, 20 do
+	for i= 1, 5 do
 		agents[i] = skynet.newservice("base/http/agent")
 	end
 	local balance = 1

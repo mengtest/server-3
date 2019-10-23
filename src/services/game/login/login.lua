@@ -51,8 +51,7 @@ function CMD.login(agent, data, address)
         bool = skynet.call("mongo", "lua", "update", "increase", {key = "users"}, {key = "users", value = sid}, true)
 
         local loginTime = os.time()
-        local addNum = string.gsub(address, "%.", "")
-        local token = string.uuid(loginTime, tonumber(addNum))
+        local token = string.uuid(address)
         user = {
             account = account,
             password = password,
