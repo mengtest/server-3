@@ -1,12 +1,12 @@
 local config = {}
 
 config.serviceErrorCode = {
-    SUCCESS = 0,
-    TIMEOUT = 1,
-    ERROR_METHOD = 2,
-    ERROR_SERVICE = 3,
-    PRIVATE_SERVICE = 4,
-    ERROR_PARAM = 5,
+    SUCCESS = 1,
+    TIMEOUT = 2,
+    ERROR_METHOD = 3,
+    ERROR_SERVICE = 4,
+    PRIVATE_SERVICE = 5,
+    ERROR_PARAM = 6,
 }
 
 return config

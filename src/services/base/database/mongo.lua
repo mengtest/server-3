@@ -45,6 +45,20 @@ function CMD.find(cname, selector, field_selector)
     return db[cname]:find(selector, field_selector)
 end
 
+function CMD.getInc(key)
+    local increase
+    local result = CMD.findOne("increase", {key = key})
+    if not result then
+        increase = 1
+        result = {key = key, value = increase}
+    else
+        result.value = result.value + 1
+        increase = result.value
+    end
+    CMD.update("increase", {key = key}, result, true)
+    return increase
+end
+
 skynet.start(function()
     skynet.dispatch("lua", function(session, address, cmd, ...)
         local func = CMD[cmd]

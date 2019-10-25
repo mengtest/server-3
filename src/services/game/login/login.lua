@@ -1,79 +1,84 @@
 local skynet = require("skynet")
+local config = require("services.game.login.config")
+local code = config.code
 require("framework.functions")
 
 local CMD = {}
 
-local code = {
-    SUCCESS = 0,
-	FAILED = 1,
-}
-
-local function errorback(msg)
+local function errorback(code)
     return {
-        code = code.FAILED,
-        msg = msg
+        code = code,
+        msg = config.errorStr(code)
     }
 end
 
-function CMD.login(agent, data, address)
+function CMD.login(data, address)
+    local errorCode = code.FAILED
+
     local account = data.account
-    local msg = ""
     if string.isEmpty(account) then
-        return errorback("account is nil")
+        return errorback(code.ERROR_ACCOUNT)
     end
 
     local password = data.password
-    local user = skynet.call("mongo", "lua", "findOne", "users", {account = account})
-    if user then
-        if password == "" or user.password == password then
-            local loginTime = os.time()
-            local token = string.uuid(address)
-            user.token = token
-            user.loginTime = loginTime
-            user.address = address
-            if skynet.call("mongo", "lua", "update", "users", {account = account}, user) then
-                return {
-                    code = code.SUCCESS,
-                    msg = "",
-                    account = {token = token},
-                    user = {uid = user.uid, nick = user.nick}
-                }
+    local loginType = data.loginType
+
+    local loginTime = skynet.time()
+    local token = string.uuid(address)
+
+    local accountInfo = skynet.call("mongo", "lua", "findOne", "account", {account = account})
+    if accountInfo then
+        if loginType == config.loginType.GUEST then
+            if string.isEmpty(password) or accountInfo.token == password then
+                local user = skynet.call("status", "lua", "callServiceMethod", "user", "get", accountInfo.uid)
+                if user then
+                    accountInfo.loginTime = loginTime
+                    accountInfo.token = token
+                    accountInfo.loginType = loginType
+                    local bool, msg = skynet.call("mongo", "lua", "update", "account", {account = account}, accountInfo)
+                    if bool then
+                        return {
+                            code = code.SUCCESS,
+                            msg = config.errorStr(code),
+                            user = user, 
+                            account = {token = token}
+                        }
+                    end
+                    errorCode = code.ERROR_SAVE
+                end
+                errorCode = code.ERROR_USER
             end
+            errorCode = code.ERROR_ACCOUNT
         end
-        msg = "password is error"
+        errorCode = code.ERROR_LOGIN_TYPE
     else
-        local userInc = skynet.call("mongo", "lua", "findOne", "increase", {key = "users"})
-        local sid = 1
-        local bool = true
-        if userInc then
-            sid = userInc.value + 1
+        if loginType == config.loginType.GUEST then
+            local user = skynet.call("status", "lua", "callServiceMethod", "user", "register")
+            if user then
+                local accountInfo = {
+                    account = account,
+                    password = "",
+                    token = token,
+                    uid = user.uid,
+                    registerTime = loginTime,
+                }
+                local bool, msg = skynet.call("mongo", "lua", "update", "account", {account = account}, accountInfo)
+                if bool then
+                    return {
+                        code = code.SUCCESS,
+                        msg = config.errorStr(code),
+                        user = user,
+                        account = {token = token}
+                    }
+                end
+                errorCode = code.ERROR_SAVE
+            end
+            errorCode = code.ERROR_USER
         end
-        bool = skynet.call("mongo", "lua", "update", "increase", {key = "users"}, {key = "users", value = sid}, true)
-
-        local loginTime = os.time()
-        local token = string.uuid(address)
-        user = {
-            account = account,
-            password = password,
-            appversion = data.appversion,
-            token = token,
-            loginTime = loginTime,
-            address = address,
-            secret = newsecret,
-            uid = sid,
-            nick = "Guest" .. sid,
-        }
-
-        if skynet.call("mongo", "lua", "insert", "users", user) then
-            return {
-                code = code.SUCCESS,
-                msg = "",
-                account = {token = token},
-                user = {uid = user.uid, nick = user.nick}
-            }
-        end
+        errorCode = code.ERROR_LOGIN_TYPE
     end
-    return errorback()
+
+    return errorback(errorCode)
 end
 
 skynet.start(function ()

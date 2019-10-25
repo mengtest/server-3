@@ -508,7 +508,7 @@ end
 
 function io.mkdir(path)
     if not io.exists(path) then
-        return os.execute("mkdir " .. path)
+        return os.execute("mkdir -p " .. path)
     end
     return true
 end

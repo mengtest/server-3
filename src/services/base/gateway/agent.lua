@@ -29,13 +29,14 @@ end
 
 function CMD.receiveData(data)
 	local datas = parse.parseData(data)
+    dump(datas)
 	for i,v in ipairs(datas) do
 		local serviceName, methodName = string.match(v.service, "^(.+)%.(.+)$")
 		local params = v.body
-		if serviceName == "socket" then
-			sendData(v.service, code.ERROR_SERVICE)
+		if serviceName == "socket" and methodName == "heartbeat" then
+			sendData(v.service, code.SUCCESS, {code = 1, index = params.index})
 		else
-			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, skynet.self(), params))
+			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, params))
 		end
 	end
 end

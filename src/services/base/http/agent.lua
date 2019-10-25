@@ -54,18 +54,16 @@ function CMD.upload(url, query, header, body)
                 end
             end
         end
-        if not parseData.type then
+        if not parseData["type"] then
             return 416
         end
         local fileName, ext = string.match(parseData.fileName or "", "^([^%.]+)%.?(.*)$")
         if not string.isEmpty(ext) then
             ext = "." .. ext
         end
-        fileName = table.concat({fileName, "_", string.uuid(os.time()), ext})
-        local dir = table.concat({"files/upload/", parseData.type, "/"})
-        if not io.exists(dir) then
-            io.mkdir(dir)
-        end
+        fileName = table.concat({fileName, "_", string.uuid(), ext})
+        local dir = table.concat({"files/upload/", parseData["type"], "/"})
+        io.mkdir(dir)
         io.writefile(dir .. fileName, parseData.fileData)
         return 200, fileName
     end
