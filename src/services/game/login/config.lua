@@ -21,3 +21,5 @@ config.errorStr = {
 config.loginType = {
     GUEST = 1
 }
+
+return config

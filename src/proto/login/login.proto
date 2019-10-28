@@ -6,10 +6,11 @@ message loginReq {
     string      account     = 1;    //账号
     string      password    = 2;    //密码或者空
     int32       appversion  = 3;    //apk版本
+    int32       loginType   = 4;    //登录类型，1 游客，
 }
 
 message loginResp {
-    int32       code        = 1;    //结果码，0为成功，其他失败
+    int32       code        = 1;    //结果码，1为成功，其他失败
     string      msg         = 2;    //回复消息
     accountInfo account     = 3;    //账号信息
     userInfo    user        = 4;    //用户信息

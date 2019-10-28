@@ -1,30 +1,38 @@
 local skynet = require("skynet")
+local config = require("services.game.user.config")
 require("framework.functions")
 
 local CMD = {}
 
-local code = {
-    SUCCESS = 0,
-	FAILED = 1,
-}
-
-local function errorback(msg)
-    return {
-        code = code.FAILED,
-        msg = msg
+function CMD.register()
+    local uid = skynet.call("mongo", "lua", "getInc", "UserId")
+    local user = {
+        uid = uid,
+        nick = "Guest_" .. uid
     }
+    local bool = skynet.call("mongo", "lua", "insert", "User", user)
+    if bool then
+        return user
+    end
 end
 
-function CMD.register(agent, data)
-
+function CMD.get(uid)
+    local user = skynet.call("mongo", "lua", "findOne", "User", {uid = uid})
+    if user then
+        return {
+            uid = uid,
+            nick = user.nick
+        }
+    end
 end
 
-function CMD.get(agent, data)
-
-end
-
-function CMD.modify(agent, data)
-    
+function CMD.modify(uid, userData)
+    local user = skynet.call("mongo", "lua", "findOne", "User", {uid = uid})
+    if user then
+        table.merge(user, userData)
+    end
+    local bool = skynet.call("mongo", "lua", "update", "User", user)
+    return bool
 end
 
 skynet.start(function ()

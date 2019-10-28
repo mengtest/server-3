@@ -1,12 +1,13 @@
 
-ì
-src/proto/login/login.protologin"`
+Š
+src/proto/login/login.protologin"~
 loginReq
 account (	Raccount
 password (	Rpassword
 
 appversion (R
-appversion"„
+appversion
+	loginType (R	loginType"„
 	loginResp
 code (Rcode
 msg (	Rmsg,
