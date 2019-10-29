@@ -33,9 +33,9 @@ function CMD.receiveData(data, client, addr)
                 skynet.call(WATCHDOG, "lua", "bindClient", client, secret, params.secret)
             end
         elseif serviceName == "login" and methodName == "login" then
-            local cd, ret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, params, addr)
+            local cd, ret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, nil, params, addr)
             if cd == code.SUCCESS and ret.code == 1 then
-                skynet.call(WATCHDOG, "lua", "bindAgent", client)
+                skynet.call(WATCHDOG, "lua", "bindAgent", client, ret.user.uid)
             end
             sendData(client, v.service, cd, ret)
         else

@@ -47,7 +47,7 @@ end
 
 function CMD.getInc(key)
     local increase
-    local result = CMD.findOne("increase", {key = key})
+    local result = CMD.findOne("Increase", {key = key})
     if not result then
         increase = 1
         result = {key = key, value = increase}
@@ -55,7 +55,7 @@ function CMD.getInc(key)
         result.value = result.value + 1
         increase = result.value
     end
-    CMD.update("increase", {key = key}, result, true)
+    CMD.update("Increase", {key = key}, result, true)
     return increase
 end
 

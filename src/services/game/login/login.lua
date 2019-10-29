@@ -12,7 +12,7 @@ local function errorback(code)
     }
 end
 
-function CMD.login(data, address)
+function CMD.login(_, data, address)
     local account = data.account
     if string.isEmpty(account) then
         return errorback(code.ERROR_ACCOUNT)

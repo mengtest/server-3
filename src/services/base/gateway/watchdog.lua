@@ -74,14 +74,14 @@ function CMD.bindClient(fd, secret, oldSecret)
     agents[fd].secret = secret
 end
 
-function CMD.bindAgent(fd)
+function CMD.bindAgent(fd, uid)
     local agent = agents[fd].agent
     if not agent then
         agent = skynet.newservice("base/gateway/agent")
-        skynet.call(agent, "lua", "start", {gate = gate, client = fd, watchdog = skynet.self()})
+        skynet.call(agent, "lua", "start", {gate = gate, client = fd, watchdog = skynet.self(), uid = uid})
         agents[fd].agent = agent
     else
-        skynet.call(agent, "lua", "start", {gate = gate, client = fd, watchdog = skynet.self()})
+        skynet.call(agent, "lua", "start", {gate = gate, client = fd, watchdog = skynet.self(), uid = uid})
     end
 end
 

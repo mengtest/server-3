@@ -7,6 +7,7 @@ require("framework.functions")
 local WATCHDOG
 local GATE
 local CLIENT
+local UID
 
 local CMD = {}
 
@@ -19,7 +20,8 @@ end
 function CMD.start(conf)
 	CLIENT = conf.client
 	GATE= conf.gate
-	WATCHDOG = conf.watchdog
+    WATCHDOG = conf.watchdog
+    UID = conf.uid
 	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
 
@@ -36,7 +38,7 @@ function CMD.receiveData(data)
 		if serviceName == "socket" and methodName == "heartbeat" then
 			sendData(v.service, code.SUCCESS, {code = 1, index = params.index})
 		else
-			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, params))
+			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, UID, params))
 		end
 	end
 end
