@@ -5,6 +5,8 @@ require("framework.utils.fileUtils")
 
 local type = type
 local setmetatable = setmetatable
+local skynet = require("skynet")
+math.randomseed(skynet.now())
 
 function checknumber(value, base)
     return tonumber(value, base) or 0

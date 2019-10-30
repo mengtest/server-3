@@ -1,13 +1,18 @@
 
-Š
-src/proto/login/login.protologin"~
-loginReq
-account (	Raccount
-password (	Rpassword
+í
+src/proto/login/login.protologin"à
+loginReq
+appId (RappId
 
-appversion (R
-appversion
-	loginType (R	loginType"„
+appVersion (	R
+appVersion*
+appVersionNumber (RappVersionNumber
+
+deviceType (	R
+deviceType
+account (	Raccount
+password (	Rpassword
+	loginType (R	loginType"„
 	loginResp
 code (Rcode
 msg (	Rmsg,

@@ -1,7 +1,7 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
 local parse = require("base.gateway.dataparser").new()
-local code = require("config.codeConfig").serviceErrorCode
+local code = require("base.status.config").code
 require("framework.functions")
 
 local WATCHDOG

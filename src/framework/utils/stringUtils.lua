@@ -210,8 +210,6 @@ end
 
 function string.uuid(addr)
     local uuid = require("framework.uuid")
-    local skynet = require("skynet")
-    uuid.randomseed(skynet.now())
     if addr then
         local a,b,c,d = string.match(addr, "(%d+)%.(%d+)%.(%d+)%.(%d+)")
         return uuid(math.intToHex(a) .. math.intToHex(b) .. math.intToHex(c) .. math.intToHex(d) .. math.intToHex(a) .. math.intToHex(d))

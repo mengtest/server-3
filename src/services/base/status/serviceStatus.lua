@@ -1,7 +1,7 @@
 local skynet = require("skynet")
 require("skynet.manager")
-local serviceConfig = require("config.serviceConfig")
-local serviceErrorCode = require("config.codeConfig").serviceErrorCode
+local config = require("base.status.config")
+local code = config.code
 require("framework.functions")
 
 local services = {}
@@ -32,7 +32,7 @@ local function closeService(serviceName)
 end
 
 local function checkServiceMethod(serviceName, methodName)
-    -- local methods = serviceConfig.servicePublicMethod[serviceName]
+    -- local methods = config.servicePublicMethod[serviceName]
     -- if type(methods) == "table" then
     --     for i, v in ipairs(methods) do
     --         if methodName == v then
@@ -40,9 +40,9 @@ local function checkServiceMethod(serviceName, methodName)
     --         end
     --     end
     -- else
-    --     return false, serviceErrorCode.ERROR_SERVICE
+    --     return false, code.ERROR_SERVICE
     -- end
-    -- return false, serviceErrorCode.ERROR_METHOD
+    -- return false, code.ERROR_METHOD
     return true
 end
 
@@ -51,9 +51,9 @@ local function callServiceMethod(serviceName, methodName, ...)
         return skynet.call(...)
     end, services[serviceName], "lua", methodName, ...)
     if result then
-        return serviceErrorCode.SUCCESS, table.unpack(result)
+        return code.SUCCESS, table.unpack(result)
     else
-        return serviceErrorCode.TIMEOUT
+        return code.TIMEOUT
     end
 end
 
