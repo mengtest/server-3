@@ -1,27 +1,12 @@
 local skynet = require("skynet")
 require("skynet.manager")
+
+local skynetEx = require("framework.extend.skynetEx")
 local config = require("base.status.config")
 local code = config.code
-require("framework.functions")
+require("framework.utils.functions")
 
 local services = {}
-
-
-local function timeoutCall(func, ...)
-    local co = coroutine.running()
-    local result = {}
-    skynet.fork(function (...)
-        result = table.pack(pcall(...))
-        if co then
-            skynet.wakeup(co)
-        end
-    end, func, ...)
-
-    skynet.sleep(300, co)
-    co = nil
-    table.remove(result, 1)
-    return result
-end
 
 local function closeService(serviceName)
     local service = services[serviceName]
@@ -47,7 +32,7 @@ local function checkServiceMethod(serviceName, methodName)
 end
 
 local function callServiceMethod(serviceName, methodName, ...)
-    local result = timeoutCall(function(...)
+    local result = skynetEx.timeoutCall(function(...)
         return skynet.call(...)
     end, services[serviceName], "lua", methodName, ...)
     if result then

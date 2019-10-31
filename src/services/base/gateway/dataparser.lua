@@ -1,5 +1,5 @@
 local skynet = require("skynet")
-require("framework.functions")
+require("framework.utils.functions")
 
 local DataParser = class("DataParser")
 

@@ -3,7 +3,7 @@ local socket = require("skynet.socket")
 local httpd = require("http.httpd")
 local sockethelper = require("http.sockethelper")
 local urllib = require("http.url")
-require("framework.functions")
+require("framework.utils.functions")
 
 local CMD = {}
 

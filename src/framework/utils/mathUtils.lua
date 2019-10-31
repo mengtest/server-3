@@ -14,3 +14,8 @@ function math.intToHex(num)
     end
     return s
 end
+
+function math.round(value)
+    value = checknumber(value)
+    return math.floor(value + 0.5)
+end

@@ -1,7 +1,8 @@
 local skynet = require("skynet")
 local config = require("services.game.login.config")
 local code = config.code
-require("framework.functions")
+require("framework.utils.functions")
+require("framework.extend.debug")()
 
 local CMD = {}
 
@@ -10,6 +11,27 @@ local function errorback(code)
         code = code,
         msg = config.errorStr[code]
     }
+end
+
+local function newAccount(accountInfo)
+    return skynet.call("mongo", "lua", "insert", "Account", accountInfo)
+end
+
+local function getAccount(param)
+    return skynet.call("mongo", "lua", "findOne", "Account", param)
+end
+
+function CMD.register(acc, pwd, time)
+    local _, user = skynet.call("status", "lua", "callServiceMethod", "user", "register")
+    if user then
+        local accountInfo = {
+            account = acc,
+            password = pwd,
+            uid = user.uid,
+            registerTime = time
+        }
+        return newAccount(accountInfo)
+    end
 end
 
 function CMD.login(_, data, address)
@@ -24,46 +46,32 @@ function CMD.login(_, data, address)
     local loginTime = skynet.time()
     local token = string.uuid(address)
 
-    local accountInfo = skynet.call("mongo", "lua", "findOne", "Account", {account = account})
+    local accountInfo = getAccount({account = account})
+    if not accountInfo then
+        local bool = CMD.register(account, password, loginTime)
+        if not bool then
+            return errorback(code.FAILED)
+        end
+        accountInfo = getAccount({account = account})
+    end
     if accountInfo then
         if loginType == config.loginType.GUEST then
             local _, user = skynet.call("status", "lua", "callServiceMethod", "user", "get", accountInfo.uid)
             if user then
-                accountInfo.loginTime = loginTime
-                accountInfo.token = token
-                accountInfo.loginType = loginType
-                local bool, msg = skynet.call("mongo", "lua", "update", "Account", {account = account}, accountInfo)
+                local _, status = skynet.call("status", "lua", "callServiceMethod", "status", "getAppInfo", accountInfo.uid)
+                status = status or {uid = accountInfo.uid}
+                status.loginTime = loginTime
+                status.loginType = loginType
+                status.appId = data.appId
+                status.appVersion = data.appVersion
+                status.appVersionNumber = data.appVersionNumber
+                status.deviceType = data.deviceType
+                local _, bool = skynet.call("status", "lua", "callServiceMethod", "status", "setAppInfo", accountInfo.uid, status)
                 if bool then
                     return {
                         code = code.SUCCESS,
                         msg = config.errorStr[code.SUCCESS],
-                        user = user, 
-                        account = {token = token}
-                    }
-                end
-                return errorback(code.ERROR_SAVE)
-            end
-            return errorback(code.ERROR_USER)
-        end
-        return errorback(code.ERROR_LOGIN_TYPE)
-    else
-        if loginType == config.loginType.GUEST then
-            local _, user = skynet.call("status", "lua", "callServiceMethod", "user", "register")
-            if user then
-                local accountInfo = {
-                    account = account,
-                    password = "",
-                    token = token,
-                    uid = user.uid,
-                    registerTime = loginTime,
-                }
-                local bool, msg = skynet.call("mongo", "lua", "insert", "Account", accountInfo)
-                if bool then
-                    return {
-                        code = code.SUCCESS,
-                        msg = config.errorStr[code.SUCCESS],
-                        user = user,
-                        account = {token = token}
+                        user = user
                     }
                 end
                 return errorback(code.ERROR_SAVE)

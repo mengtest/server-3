@@ -1,6 +1,6 @@
 local skynet = require("skynet")
 require("skynet.manager")
-require("framework.functions")
+require("framework.utils.functions")
 
 local SOCKET = {}
 local CMD = {}
