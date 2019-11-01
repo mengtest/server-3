@@ -33,6 +33,10 @@ function CMD.register(acc, pwd, time)
     end
 end
 
+function CMD.getAccount(uid)
+    return getAccount({uid = uid})
+end
+
 function CMD.login(_, data, address)
     local account = data.account
     if string.isEmpty(account) then
