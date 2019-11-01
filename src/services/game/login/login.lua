@@ -2,7 +2,6 @@ local skynet = require("skynet")
 local config = require("services.game.login.config")
 local code = config.code
 require("framework.utils.functions")
-require("framework.extend.debug")()
 
 local CMD = {}
 
