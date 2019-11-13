@@ -61,12 +61,12 @@ local function syslog(level, ...)
         if type(value) == "table" then
             str = dump(value)
         else
-            str = type(value) .. " = " .. tostring(value)
+            str = type(value) .. " : " .. tostring(value)
         end
         table.insert(out, str)
     end
     local str = table.concat(out, "\t\t")
-    str = logDes[level] .. os.date("[%Y-%m-%d %H:%M:%S]\n", math.floor(skynet.time())) .. str
+    str = logDes[level] .. os.date("[%Y-%m-%d %H:%M:%S] ", math.floor(skynet.time())) .. str
     skynet.error(str)
 end
 

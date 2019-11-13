@@ -1,9 +1,10 @@
 local skynetEx = {}
 local skynet = require("skynet")
+local log = require("framework.extend.log")
 
 function skynetEx.timeoutCall(func, ...)
     local co = coroutine.running()
-    local result = {}
+    local result
     skynet.fork(function (...)
         result = table.pack(pcall(...))
         if co then
@@ -13,8 +14,15 @@ function skynetEx.timeoutCall(func, ...)
 
     skynet.sleep(300, co)
     co = nil
-    table.remove(result, 1)
-    return result
+    if result then
+        if result[1] then
+            return table.remove(result, 1), result
+        else
+            return false
+        end
+    else
+        return false
+    end
 end
 
 return skynetEx

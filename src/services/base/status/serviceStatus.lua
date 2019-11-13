@@ -32,10 +32,10 @@ local function checkServiceMethod(serviceName, methodName)
 end
 
 local function callServiceMethod(serviceName, methodName, ...)
-    local result = skynetEx.timeoutCall(function(...)
+    local bool, result = skynetEx.timeoutCall(function(...)
         return skynet.call(...)
     end, services[serviceName], "lua", methodName, ...)
-    if result then
+    if bool then
         return code.SUCCESS, table.unpack(result)
     else
         return code.TIMEOUT

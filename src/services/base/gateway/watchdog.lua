@@ -1,6 +1,7 @@
 local skynet = require("skynet")
 require("skynet.manager")
 require("framework.utils.functions")
+local log = require("framework.extend.log")
 
 local SOCKET = {}
 local CMD = {}
@@ -12,11 +13,12 @@ local agents = {}
 local secretToAgent = {}
 
 local function closeAgent(fd)
+    skynet.call(gate, "lua", "closeClient", fd)
     local agentInfo = agents[fd]
     if not table.isEmpty(agentInfo) then
         local agent = agentInfo.agent
         if agent then
-            skynet.call(agent, "lua", "close")
+            skynet.call(agent, "lua", "exit")
         end
         local secret = agentInfo.secret
         if secret then
@@ -27,6 +29,19 @@ local function closeAgent(fd)
 end
 
 local function cleanUnUsedAgent()
+    while true do
+        for key, value in pairs(agents) do
+            local agent = value.agent
+            if agent then
+                if not skynet.call(agent, "lua", "isAlive") then
+                    closeAgent(key)
+                end
+            else
+                closeAgent(key)
+            end
+        end
+        skynet.sleep(60 * 100)
+    end
 end
 
 function SOCKET.connect(fd, addr)
@@ -62,12 +77,13 @@ end
 
 function CMD.bindClient(fd, secret, oldSecret)
     local oldFd = secretToAgent[oldSecret]
-    if not string.isEmpty(oldSecret) and oldFd then
+    if oldFd then
         agents[fd].agent = agents[oldFd].agent
         agents[oldFd].agent = nil
         closeAgent(oldFd)
     end
     if secretToAgent[secret] then
+        log.warning("[WATCHDOG] closed a exists connect", fd, secret, oldSecret)
         closeAgent(secretToAgent[secret])
     end
     secretToAgent[secret] = fd

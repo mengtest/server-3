@@ -9,7 +9,7 @@
 	],
 	"settings": {
 		"emmylua.source.roots": [
-			"E:/Idea/server/src"
+			"./src"
 		],
 		"emmylua.completion.caseSensitive": true,
 		"emmylua.colors.parameter": "#FD971F"

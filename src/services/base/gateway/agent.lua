@@ -10,6 +10,8 @@ local GATE
 local CLIENT
 local UID
 
+local ALIVETIME
+
 local CMD = {}
 
 local function sendData(service, code, data)
@@ -22,7 +24,8 @@ function CMD.start(conf)
 	CLIENT = conf.client
 	GATE= conf.gate
     WATCHDOG = conf.watchdog
-    UID = conf.uid
+	UID = conf.uid
+	ALIVETIME = skynet.now()
 	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
 
@@ -31,6 +34,7 @@ function CMD.exit()
 end
 
 function CMD.receiveData(data)
+	ALIVETIME = skynet.now()
 	local datas = parse.parseData(data)
     log.debug(datas)
 	for i,v in ipairs(datas) do
@@ -42,6 +46,10 @@ function CMD.receiveData(data)
 			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, UID, params))
 		end
 	end
+end
+
+function CMD.isAlive()
+	return (skynet.now() - ALIVETIME) < 100 * 100
 end
 
 skynet.start(function()
