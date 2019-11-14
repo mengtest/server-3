@@ -11,7 +11,7 @@ local GATE
 local CMD = {}
 
 local function sendData(client, service, code, data)
-	log.debug(code, data)
+    log.info(data)
     data = parse.packData(code, service, data)
 	socket.send(client, data)
 end

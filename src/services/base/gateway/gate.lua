@@ -23,6 +23,12 @@ function CMD.forward(fd, agent)
     end
 end
 
+function CMD.unForward(fd)
+    if connection[fd] then
+        connection[fd].agent = nil
+    end
+end
+
 function CMD.close()
     assert(socketId)
     socket.close(socketId)

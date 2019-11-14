@@ -15,9 +15,11 @@ local ALIVETIME
 local CMD = {}
 
 local function sendData(service, code, data)
-	log.debug(data)
-	data = parse.packData(code, service, data)
-	socket.send(CLIENT, data)
+	if CLIENT then
+		log.info(data)
+		data = parse.packData(code, service, data)
+		socket.send(CLIENT, data)
+	end
 end
 
 function CMD.start(conf)
@@ -29,8 +31,12 @@ function CMD.start(conf)
 	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
 
-function CMD.exit()
+function CMD.close(bool)
 	skynet.exit()
+end
+
+function CMD.closeConnect()
+	CLIENT = nil
 end
 
 function CMD.receiveData(data)
@@ -49,11 +55,11 @@ function CMD.receiveData(data)
 end
 
 function CMD.isAlive()
-	return (skynet.now() - ALIVETIME) < 100 * 100
+	return (skynet.now() - ALIVETIME) < 120 * 100
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(_,_, command, ...)
+	skynet.dispatch("lua", function(s, a, command, ...)
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

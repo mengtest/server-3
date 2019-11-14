@@ -49,7 +49,7 @@ local function dump(value, depth)
         end
     end
     _dump(value, "", "table", depth)
-    return table.concat(temp, "\n")
+    return (table.concat(temp, "\n")) .. "\n"
 end
 
 local function syslog(level, ...)
@@ -61,7 +61,7 @@ local function syslog(level, ...)
         if type(value) == "table" then
             str = dump(value)
         else
-            str = type(value) .. " : " .. tostring(value)
+            str = tostring(value)
         end
         table.insert(out, str)
     end
@@ -84,6 +84,22 @@ end
 
 function log.error(...)
     syslog(logLevel.ERROR, ...)
+end
+
+function log.fdebug(...)
+    syslog(logLevel.DEBUG, string.format(...))
+end
+
+function log.finfo(...)
+    syslog(logLevel.INFO, string.format(...))
+end
+
+function log.fwarning(...)
+    syslog(logLevel.WARNING, string.format(...))
+end
+
+function log.ferror(...)
+    syslog(logLevel.ERROR, string.format(...))
 end
 
 
