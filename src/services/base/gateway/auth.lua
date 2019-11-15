@@ -21,7 +21,7 @@ function CMD.start(conf)
 	WATCHDOG = conf.watchdog
 end
 
-function CMD.receiveData(data, client, addr)
+function CMD.receiveData(client, data, addr)
 	local datas = parse.parseData(data)
     log.debug(datas)
 	for i,v in ipairs(datas) do

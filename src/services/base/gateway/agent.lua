@@ -31,11 +31,12 @@ function CMD.start(conf)
 	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
 
-function CMD.close(bool)
+function CMD.close()
 	skynet.exit()
 end
 
 function CMD.closeConnect()
+	ALIVETIME = nil
 	CLIENT = nil
 end
 
@@ -55,11 +56,17 @@ function CMD.receiveData(data)
 end
 
 function CMD.isAlive()
-	return (skynet.now() - ALIVETIME) < 120 * 100
+	if ALIVETIME then
+		return (skynet.now() - ALIVETIME) < 120 * 100
+	end
+end
+
+function CMD.sendData(service, data)
+	sendData(service, 1, data)
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(s, a, command, ...)
+	skynet.dispatch("lua", function(_, _, command, ...)
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

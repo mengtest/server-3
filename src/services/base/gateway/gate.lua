@@ -76,7 +76,6 @@ function CMD.start(watchDog)
             socketId = nil
         else
             skynet.send(watchDog, "lua", "socket", "disConnect", fd)
-            close(fd)
         end
     end
 
@@ -106,7 +105,6 @@ function CMD.start(watchDog)
             skynet.error("socket close", error)
         else
             skynet.send(watchDog, "lua", "socket", "error", fd, error)
-            close(fd)
         end
     end
 
