@@ -30,3 +30,8 @@ message authResp {
     int32       code        = 1;    //结果码
     string      secret      = 2;    //新的密钥
 }
+
+message offlineResp {
+    int32       code        = 1;    //结果码
+    string      msg         = 2;    //提示
+}

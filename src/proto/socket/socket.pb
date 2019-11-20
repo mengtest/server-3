@@ -1,5 +1,5 @@
 
-ö
+«
 src/proto/socket/socket.protosocket"9
 	socketReq
 service (	Rservice
@@ -18,4 +18,7 @@ socketResp
 secret (	Rsecret"6
 authResp
 code (Rcode
-secret (	Rsecretbproto3
+secret (	Rsecret"3
+offlineResp
+code (Rcode
+msg (	Rmsgbproto3

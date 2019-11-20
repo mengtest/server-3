@@ -5,6 +5,8 @@ local code = require("base.status.config").code
 local log = require("framework.extend.log")
 require("framework.utils.functions")
 
+local socketCode = require("services.base.gateway.config").code
+
 local WATCHDOG
 local GATE
 local CLIENT
@@ -22,11 +24,15 @@ local function sendData(service, code, data)
 	end
 end
 
-function CMD.start(conf)
+function CMD.init(conf)
+	ALIVETIME = skynet.now()
 	CLIENT = conf.client
 	GATE= conf.gate
     WATCHDOG = conf.watchdog
 	UID = conf.uid
+end
+
+function CMD.start()
 	ALIVETIME = skynet.now()
 	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
@@ -38,6 +44,7 @@ end
 function CMD.closeConnect()
 	ALIVETIME = nil
 	CLIENT = nil
+	UID = nil
 end
 
 function CMD.receiveData(data)
@@ -48,7 +55,7 @@ function CMD.receiveData(data)
 		local serviceName, methodName = string.match(v.service, "^(.+)%.(.+)$")
 		local params = v.body
 		if serviceName == "socket" and methodName == "heartbeat" then
-			sendData(v.service, code.SUCCESS, {code = 1, index = params.index})
+			sendData(v.service, code.SUCCESS, {code = socketCode.SUCCESS, index = params.index})
 		else
 			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, UID, params))
 		end

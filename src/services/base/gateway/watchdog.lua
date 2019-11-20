@@ -1,9 +1,10 @@
 local skynet = require("skynet")
 require("skynet.manager")
 
+local offlineCode = require("services.base.gateway.config").offlineCode
+local offlineErrorStr = require("services.base.gateway.config").offlineErrorStr
 require("framework.utils.functions")
 local log = require("framework.extend.log")
-require("framework.extend.debug")()
 
 local SOCKET = {}
 local CMD = {}
@@ -23,6 +24,7 @@ local function closeAgent(fd)
     if data then
         local agent = agents[fd]
         if agent then
+            skynet.call(agent, "lua", "sendData", "socket.offline", {code = offlineCode.TIMEOUT, msg = offlineErrorStr[offlineCode.TIMEOUT]})
             skynet.call(agent, "lua", "closeConnect")
             table.insert(freeAgents, agent)
             agents[fd] = nil
@@ -46,10 +48,19 @@ local function getFreeAgent()
 end
 
 local function closeUnUsedAgent()
+    while true do
+        for fd, agent in pairs(agents) do
+            if not skynet.call(agent, "lua", "isAlive") then
+                closeAgent(fd)
+            end
+        end
+        skynet.sleep(120 * 100)
+    end
 end
 
 function SOCKET.connect(fd, addr)
     local agent = getFreeAgent()
+    skynet.call(agent, "lua", "init", {client = fd})
     agents[fd] = agent
     info[fd] = {
         fd = fd,
@@ -100,7 +111,8 @@ function CMD.bindAgent(fd, uid)
     info[fd].uid = uid
 
     if agents[fd] then
-        skynet.call(agents[fd], "lua", "start", {gate = gate, client = fd, watchdog = skynet.self(), uid = uid, secret = info[fd].secret})
+        skynet.call(agents[fd], "lua", "init", {gate = gate, client = fd, watchdog = skynet.self(), uid = uid, secret = info[fd].secret})
+        skynet.call(agents[fd], "lua", "start")
     end
 end
 
@@ -114,8 +126,6 @@ function CMD.push(uid, service, data, fd)
         local agent = agents[fd]
         if agent then
             skynet.send(agent, "lua", "sendData", service, data)
-        else
-            skynet.send(auth, "lua", "sendData", fd, service, data)
         end
     end
 end
