@@ -95,20 +95,24 @@ function log.error(...)
     syslog(logLevel.ERROR, ...)
 end
 
-function g_Log.debugf(...)
-    g_Log.debug(string.format(...))
+function log.debugf(...)
+    log.debug(string.format(...))
 end
 
-function g_Log.infof(...)
-    g_Log.info(string.format(...))
+function log.infof(...)
+    log.info(string.format(...))
 end
 
-function g_Log.warningf(...)
-    g_Log.warning(string.format(...))
+function log.warningf(...)
+    log.warning(string.format(...))
 end
 
-function g_Log.errorf(...)
-    g_Log.error(string.format(...))
+function log.errorf(...)
+    log.error(string.format(...))
 end
+
+setmetatable(log, {__call = function(log, ...)
+    log.debug(...)
+end})
 
 return log

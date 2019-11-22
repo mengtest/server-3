@@ -3,8 +3,6 @@ require("framework.utils.tableUtils")
 require("framework.utils.mathUtils")
 require("framework.utils.fileUtils")
 
-local type = type
-local setmetatable = setmetatable
 local skynet = require("skynet")
 math.randomseed(skynet.now())
 
