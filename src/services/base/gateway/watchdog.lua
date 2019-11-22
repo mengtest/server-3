@@ -83,7 +83,7 @@ function SOCKET.error(fd, error)
 end
 
 function SOCKET.warning(fd, size)
-    log.fwarning("%d : %dKb", fd, size)
+    log.warningf("%d : %dKb", fd, size)
 end
 
 function CMD.start()

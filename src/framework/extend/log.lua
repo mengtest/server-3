@@ -48,24 +48,33 @@ local function dump(value, depth)
             end
         end
     end
-    _dump(value, "", "table", depth)
-    return (table.concat(temp, "\n")) .. "\n"
+    _dump(value, " |", "table", depth)
+    return (table.concat(temp, "\n"))
 end
 
 local function syslog(level, ...)
     local n = select("#", ...)
-    local out = {}
+    local out = {{}}
     local str = ""
     for i = 1, n do
         local value = select(i, ...)
         if type(value) == "table" then
             str = dump(value)
+            out[#out + 1] = {str}
+            out[#out + 1] = {}
         else
             str = tostring(value)
+            table.insert(out[#out], str)
         end
-        table.insert(out, str)
     end
-    local str = table.concat(out, "\t\t")
+    local tmp = {}
+    for i,v in ipairs(out) do
+        local str = table.concat(v, "\t")
+        if str ~= "" then
+            table.insert(tmp, str)
+        end
+    end
+    local str = table.concat(tmp, "\n")
     str = logDes[level] .. os.date("[%Y-%m-%d %H:%M:%S] ", math.floor(skynet.time())) .. str
     skynet.error(str)
 end
@@ -86,21 +95,20 @@ function log.error(...)
     syslog(logLevel.ERROR, ...)
 end
 
-function log.fdebug(...)
-    syslog(logLevel.DEBUG, string.format(...))
+function g_Log.debugf(...)
+    g_Log.debug(string.format(...))
 end
 
-function log.finfo(...)
-    syslog(logLevel.INFO, string.format(...))
+function g_Log.infof(...)
+    g_Log.info(string.format(...))
 end
 
-function log.fwarning(...)
-    syslog(logLevel.WARNING, string.format(...))
+function g_Log.warningf(...)
+    g_Log.warning(string.format(...))
 end
 
-function log.ferror(...)
-    syslog(logLevel.ERROR, string.format(...))
+function g_Log.errorf(...)
+    g_Log.error(string.format(...))
 end
-
 
 return log
