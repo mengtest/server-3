@@ -96,19 +96,19 @@ function log.error(...)
 end
 
 function log.debugf(...)
-    log.debug(string.format(...))
+    syslog(logLevel.DEBUG, string.format(...))
 end
 
 function log.infof(...)
-    log.info(string.format(...))
+    syslog(logLevel.INFO, string.format(...))
 end
 
 function log.warningf(...)
-    log.warning(string.format(...))
+    syslog(logLevel.WARNING, string.format(...))
 end
 
 function log.errorf(...)
-    log.error(string.format(...))
+    syslog(logLevel.ERROR, string.format(...))
 end
 
 setmetatable(log, {__call = function(log, ...)
