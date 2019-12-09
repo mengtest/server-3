@@ -37,7 +37,7 @@ function CMD.getAccount(uid)
     return getAccount({uid = uid})
 end
 
-function CMD.login(_, data, address)
+function CMD.login(_, data)
     local account = data.account
     if string.isEmpty(account) then
         return errorback(code.ERROR_ACCOUNT)
@@ -47,7 +47,6 @@ function CMD.login(_, data, address)
     local loginType = data.loginType
 
     local loginTime = skynet.time()
-    local token = string.uuid(address)
 
     local accountInfo = getAccount({account = account})
     if not accountInfo then

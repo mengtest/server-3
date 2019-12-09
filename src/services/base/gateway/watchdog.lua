@@ -1,30 +1,31 @@
 local skynet = require("skynet")
 require("skynet.manager")
+require("framework.utils.functions")
+local log = require("framework.extend.log")
 
 local offlineCode = require("services.base.gateway.config").offlineCode
 local offlineErrorStr = require("services.base.gateway.config").offlineErrorStr
-require("framework.utils.functions")
-local log = require("framework.extend.log")
 
 local SOCKET = {}
 local CMD = {}
 
 local gate
-local auth
 
 local info = {}
-local secretToFd = {}
-local uidToFd = {}
+
 local agents = {}
 local freeAgents = {}
 
-local function closeAgent(fd)
+local uidToFd = {}
+
+local function closeAgent(fd, closeCode)
+    closeCode = closeCode or offlineCode.CLOSE
     local data = info[fd]
     info[fd] = nil
     if data then
         local agent = agents[fd]
         if agent then
-            skynet.call(agent, "lua", "sendData", "socket.offline", {code = offlineCode.TIMEOUT, msg = offlineErrorStr[offlineCode.TIMEOUT]})
+            skynet.call(agent, "lua", "sendData", "socket.offline", {code = closeCode, msg = offlineErrorStr[closeCode]})
             skynet.call(agent, "lua", "closeConnect")
             table.insert(freeAgents, agent)
             agents[fd] = nil
@@ -51,7 +52,7 @@ local function closeUnUsedAgent()
     while true do
         for fd, agent in pairs(agents) do
             if not skynet.call(agent, "lua", "isAlive") then
-                closeAgent(fd)
+                closeAgent(fd, offlineCode.TIMEOUT)
             end
         end
         skynet.sleep(120 * 100)
@@ -60,18 +61,16 @@ end
 
 function SOCKET.connect(fd, addr)
     local agent = getFreeAgent()
-    skynet.call(agent, "lua", "init", {client = fd})
     agents[fd] = agent
     info[fd] = {
         fd = fd,
         addr = addr
     }
+    skynet.call(agent, "lua", "start", {client = fd, gate = gate, watchdog = skynet.self()})
 end
 
 function SOCKET.data(fd, str)
-    if info[fd] then
-        skynet.send(auth, "lua", "receiveData", fd, str, info[fd].addr)
-    end
+    log.errorf("Error fd:%d, data:%s, ip:%s", fd, str, info[fd].addr)
 end
 
 function SOCKET.disConnect(fd)
@@ -87,37 +86,21 @@ function SOCKET.warning(fd, size)
 end
 
 function CMD.start()
-    auth = skynet.newservice("base/gateway/auth")
-    skynet.call(auth, "lua", "start", {gate = gate, watchdog = skynet.self()})
     skynet.call(gate, "lua", "start", skynet.self())
     skynet.call(gate, "lua", "open", {nodelay = true})
-
     skynet.fork(closeUnUsedAgent)
 end
 
-function CMD.bindClient(fd, secret)
-    if secretToFd[secret] then
-        closeAgent(secretToFd[secret])
-    end
-    secretToFd[secret] = fd
-    info[fd].secret = secret
-end
-
-function CMD.bindAgent(fd, uid)
+function CMD.bindAgentByUid(fd, uid)
     if uidToFd[uid] then
-        closeAgent(uidToFd[uid])
+        closeAgent(uidToFd[uid], offlineCode.MULTIPLE)
     end
     uidToFd[uid] = fd
     info[fd].uid = uid
-
-    if agents[fd] then
-        skynet.call(agents[fd], "lua", "init", {gate = gate, client = fd, watchdog = skynet.self(), uid = uid, secret = info[fd].secret})
-        skynet.call(agents[fd], "lua", "start")
-    end
 end
 
-function CMD.closeClient(fd)
-    closeAgent(fd)
+function CMD.closeClient(fd, closeCode)
+    closeAgent(fd, closeCode)
 end
 
 function CMD.push(uid, service, data, fd)
@@ -126,8 +109,10 @@ function CMD.push(uid, service, data, fd)
         local agent = agents[fd]
         if agent then
             skynet.send(agent, "lua", "sendData", service, data)
+            return true
         end
     end
+    return false
 end
 
 skynet.start(function()

@@ -10,10 +10,10 @@ local logLevel = {
 }
 
 local logDes = {
-    [logLevel.ERROR] = "[ERROR]",
-    [logLevel.WARNING] = "[WARNING]",
-    [logLevel.INFO] = "[INFO]",
-    [logLevel.DEBUG] = "[DEBUG]",
+    [logLevel.ERROR] = "[ERROR]\t",
+    [logLevel.WARNING] = "[WARNING]\t",
+    [logLevel.INFO] = "[INFO]\t",
+    [logLevel.DEBUG] = "[DEBUG]\t",
 }
 
 local function dump(value, depth)
@@ -75,7 +75,7 @@ local function syslog(level, ...)
         end
     end
     local str = table.concat(tmp, "\n")
-    str = logDes[level] .. os.date("[%Y-%m-%d %H:%M:%S] ", math.floor(skynet.time())) .. str
+    str = logDes[level] .. os.date("[%Y-%m-%d %H:%M:%S]\t", math.floor(skynet.time())) .. str
     skynet.error(str)
 end
 

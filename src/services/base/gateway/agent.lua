@@ -1,10 +1,10 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
 local parse = require("base.gateway.dataparser")
-local code = require("base.status.config").code
 local log = require("framework.extend.log")
 require("framework.utils.functions")
 
+local statusCode = require("base.status.config").code
 local socketCode = require("services.base.gateway.config").code
 
 local WATCHDOG
@@ -24,16 +24,11 @@ local function sendData(service, code, data)
 	end
 end
 
-function CMD.init(conf)
+function CMD.start(conf)
 	ALIVETIME = skynet.now()
 	CLIENT = conf.client
 	GATE= conf.gate
     WATCHDOG = conf.watchdog
-	UID = conf.uid
-end
-
-function CMD.start()
-	ALIVETIME = skynet.now()
 	skynet.call(GATE, "lua", "forward", CLIENT, skynet.self())
 end
 
@@ -55,7 +50,14 @@ function CMD.receiveData(data)
 		local serviceName, methodName = string.match(v.service, "^(.+)%.(.+)$")
 		local params = v.body
 		if serviceName == "socket" and methodName == "heartbeat" then
-			sendData(v.service, code.SUCCESS, {code = socketCode.SUCCESS, index = params.index})
+			sendData(v.service, statusCode.SUCCESS, {})
+		elseif serviceName == "login" and methodName == "login" then
+            local cd, ret = skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, nil, params)
+			if cd == statusCode.SUCCESS and ret.code == 1 then
+				UID = ret.user.uid
+                skynet.call(WATCHDOG, "lua", "bindAgentByUid", CLIENT, ret.user.uid)
+            end
+            sendData(v.service, cd, ret)
 		else
 			sendData(v.service, skynet.call("status", "lua", "callServiceSafeMethod", serviceName, methodName, UID, params))
 		end
@@ -69,7 +71,7 @@ function CMD.isAlive()
 end
 
 function CMD.sendData(service, data)
-	sendData(service, 1, data)
+	sendData(service, statusCode.SUCCESS, data)
 end
 
 skynet.start(function()

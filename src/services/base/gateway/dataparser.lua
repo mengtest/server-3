@@ -1,5 +1,6 @@
 local skynet = require("skynet")
 require("framework.utils.functions")
+local string = string
 
 local DataParser = class("DataParser")
 
@@ -10,15 +11,18 @@ local DataParser = class("DataParser")
 DataParser.cacheData = ""
 
 local function checkDataPack(data)
-    local headLen = string.sub(data, 1, 1)
-    local index = #headLen
-    if index > 0 then
-        local bodyLen = string.sub(data, index + 1, string.asciiToNum(headLen) + index)
-        if #bodyLen == string.asciiToNum(headLen) then
-            index = index + #bodyLen
-            local body = string.sub(data, index + 1, string.asciiToNum(bodyLen) + index)
-            if #body == string.asciiToNum(bodyLen) then
-                return true, index, body
+    local headLenStr = string.sub(data, 1, 1)
+    local totalLen = #headLenStr
+    if totalLen > 0 then
+        local headLen = string.asciiToNum(headLenStr)
+        local bodyLenStr = string.sub(data, totalLen + 1, headLen + totalLen)
+        if #bodyLenStr == headLen then
+            totalLen = totalLen + headLen
+            local bodyLen = string.asciiToNum(bodyLenStr)
+            local body = string.sub(data, totalLen + 1, bodyLen + totalLen)
+            if #body == bodyLen then
+                totalLen = totalLen + bodyLen
+                return true, totalLen, body
             end
         end
     end
@@ -28,7 +32,7 @@ end
 function DataParser.parseData(data)
     local datas = {}
     data = DataParser.cacheData .. data
-    local bool, headLen, body = checkDataPack(data)
+    local bool, totalLen, body = checkDataPack(data)
     while bool do
         local socketData = skynet.call("pbc", "lua", "decode", "socket.socket", body)
         if not table.isEmpty(socketData) then
@@ -36,8 +40,8 @@ function DataParser.parseData(data)
             socketData.body = serviceData
             table.insert(datas, socketData)
         end
-        data = string.sub(data, headLen + #body + 1)
-        bool, headLen, body = checkDataPack(data)
+        data = string.sub(data, totalLen + 1)
+        bool, totalLen, body = checkDataPack(data)
     end
     DataParser.cacheData = data
     return datas

@@ -13,23 +13,9 @@ message socketResp {
     string      body        = 3;    //结果
 }
 
-message heartbeatReq {
-    int32       index       = 1;    //心跳索引
-}
+message heartbeatReq {}
 
-message heartbeatResp {
-    int32       code        = 1;    //结果码
-    int32       index       = 2;    //心跳索引，服务器主动断开返回0
-}
-
-message authReq {
-    string      secret      = 1;    //老的密钥
-}
-
-message authResp {
-    int32       code        = 1;    //结果码
-    string      secret      = 2;    //新的密钥
-}
+message heartbeatResp {}
 
 message offlineResp {
     int32       code        = 1;    //结果码
