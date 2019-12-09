@@ -29,9 +29,9 @@ local function checkDataPack(data)
     return false
 end
 
-function DataParser.parseData(data)
+function DataParser:parseData(data)
     local datas = {}
-    data = DataParser.cacheData .. data
+    data = self.cacheData .. data
     local bool, totalLen, body = checkDataPack(data)
     while bool do
         local socketData = skynet.call("pbc", "lua", "decode", "socket.socket", body)
@@ -43,11 +43,11 @@ function DataParser.parseData(data)
         data = string.sub(data, totalLen + 1)
         bool, totalLen, body = checkDataPack(data)
     end
-    DataParser.cacheData = data
+    self.cacheData = data
     return datas
 end
 
-function DataParser.packData(code, service, data)
+function DataParser:packData(code, service, data)
     assert(service, "Service name must exist")
     local serviceData = skynet.call("pbc", "lua", "encode", service, data or {})
     local socketData = skynet.call("pbc", "lua", "encode", "socket.socket", {code = code, service = service, body = serviceData})

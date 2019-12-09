@@ -1,11 +1,10 @@
 local skynet = require("skynet")
 local socket = require("skynet.socketdriver")
-local parse = require("base.gateway.dataparser")
+local parse = require("base.gateway.dataparser").new()
 local log = require("framework.extend.log")
 require("framework.utils.functions")
 
 local statusCode = require("base.status.config").code
-local socketCode = require("services.base.gateway.config").code
 
 local WATCHDOG
 local GATE
@@ -19,7 +18,7 @@ local CMD = {}
 local function sendData(service, code, data)
 	if CLIENT then
 		log.info(data)
-		data = parse.packData(code, service, data)
+		data = parse:packData(code, service, data)
 		socket.send(CLIENT, data)
 	end
 end
@@ -44,7 +43,7 @@ end
 
 function CMD.receiveData(data)
 	ALIVETIME = skynet.now()
-	local datas = parse.parseData(data)
+	local datas = parse:parseData(data)
     log.debug(datas)
 	for i,v in ipairs(datas) do
 		local serviceName, methodName = string.match(v.service, "^(.+)%.(.+)$")
