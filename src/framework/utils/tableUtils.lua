@@ -87,6 +87,20 @@ function table.merge(tbA, tbB)
     end
 end
 
+function table.copy(tbA, tbB)
+    for i,v in ipairs(tbB) do
+        table.insert(tbA, v)
+    end
+end
+
+function table.sync(tbA, tbB)
+    for k,v in pairs(tbA) do
+        if tbB[k] then
+            tbA[k] = tbB[k]
+        end
+    end
+end
+
 function table.equal(tbA, tbB)
     assert(type(tbA) == "table" and type(tbB) == "table")
     if table.size(tbA) ~= table.size(tbB) then return false end

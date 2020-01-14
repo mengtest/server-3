@@ -12,6 +12,7 @@
 			"./src"
 		],
 		"emmylua.completion.caseSensitive": true,
-		"emmylua.colors.parameter": "#FD971F"
+		"emmylua.colors.parameter": "#FD971F",
+		"editor.snippetSuggestions": "inline"
 	}
 }

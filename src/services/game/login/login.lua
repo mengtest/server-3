@@ -64,9 +64,9 @@ function CMD.login(_, data)
                 status = status or {uid = accountInfo.uid}
                 status.loginTime = loginTime
                 status.loginType = loginType
-                status.appId = data.appId
-                status.appVersion = data.appVersion
-                status.appVersionNumber = data.appVersionNumber
+                status.appPackageName = data.appPackageName
+                status.appVersionName = data.appVersionName
+                status.resVersionName = data.resVersionName
                 status.deviceType = data.deviceType
                 local _, bool = skynet.call("status", "lua", "callServiceMethod", "status", "setAppInfo", accountInfo.uid, status)
                 if bool then

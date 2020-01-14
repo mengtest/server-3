@@ -3,13 +3,13 @@ syntax = "proto3";
 package login;
 
 message loginReq {
-    int32       appId       = 1;
-    string      appVersion  = 2;    //app文本版本
-    int32       appVersionNumber = 3;   //app数字版本
-    string      deviceType  = 4;    //设备类型
-    string      account     = 5;    //账号
-    string      password    = 6;    //密码或者空
-    int32       loginType   = 7;    //登录类型，1 游客，
+    string      appPackageName  = 1;    //app包名
+    string      appVersionName  = 2;    //app文本版本
+    string      resVersionName  = 3;    //res文本版本
+    string      deviceType      = 4;    //设备类型
+    string      account         = 5;    //账号
+    string      password        = 6;    //密码或者空
+    int32       loginType       = 7;    //登录类型，1 游客，
 }
 
 message loginResp {

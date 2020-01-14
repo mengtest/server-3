@@ -1,12 +1,10 @@
 
-í
-src/proto/login/login.protologin"à
-loginReq
-appId (RappId
-
-appVersion (	R
-appVersion*
-appVersionNumber (RappVersionNumber
+ƒ
+src/proto/login/login.protologin"ö
+loginReq&
+appPackageName (	RappPackageName&
+appVersionName (	RappVersionName&
+resVersionName (	RresVersionName
 
 deviceType (	R
 deviceType

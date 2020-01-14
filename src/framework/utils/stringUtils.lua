@@ -29,52 +29,54 @@ function string.split(input, delimiter)
 end
 
 function string.splitByConfig(str, config)
+    if type(config) == "string" then
+        config = {config}
+    end
     local configNum = #config
-    local splitIndex = {}
+    local splits = {}
     for i, v in ipairs(config) do
-        local split_1 = {value = string.sub(v, 1, 1), tag = i, type = 1}
-        local split_2 = {value = string.sub(v, -1, -1), tag = i, type = 2}
-
-        local index_1, index_2 = string.find(str, string.format("%%b%s", v), 1)
-        while index_1 do
-            table.insert(splitIndex, {index = index_1, value = split_1})
-            table.insert(splitIndex, {index = index_2, value = split_2})
-            index_1, index_2 = string.find(str, string.format("%%b%s", v), index_1 + 1)
+        for j = 1, 2 do
+            local split = string.sub(v, j, j)
+            local index = string.find(str, split, 1)
+            while index do
+                table.insert(splits, {index = index, tag = i, type = j})
+                index = string.find(str, split, index + 1)
+            end
         end
     end
-    table.sort(splitIndex, function(a, b)
+    table.sort(splits, function(a, b)
         return a.index < b.index
     end)
 
-    local strTemp = {}
-    local splitStack = {{tag = configNum + 1}}
-    local tempStr = ""
-    local index = 1
+    local temp = {}
+    local stack = {{tag = configNum + 1, type = 1}}
+    local split = table.remove(splits, 1)
+    local startIndex = 1
     for i = 1, #str do
-        local split = splitIndex[index]
         if split and i == split.index then
-            if tempStr ~= "" then
-                table.insert(strTemp, {str = tempStr, index = splitStack[#splitStack].tag})
-            end
-            if split.value.type == 1 then
-                table.insert(splitStack, split.value)
-            end
-            if split.value.type == 2 then
-                if splitStack[#splitStack].tag ~= split.value.tag then
-                    error("The string format is incorrect: " .. str .. ", string: " .. split.value.value)
+            local topStack = stack[#stack]
+            if not (split.tag == topStack.tag and split.type == topStack.type) then
+                if startIndex < i then
+                    table.insert(temp, {str = string.sub(str, startIndex, i - 1), index = topStack.tag})
                 end
-                table.remove(splitStack, #splitStack)
+
+                if split.type == 1 then
+                    table.insert(stack, split)
+                    startIndex = i + 1
+                end
             end
-            index = index + 1
-            tempStr = ""
-        else
-            tempStr = tempStr .. string.sub(str, i, i)
+            
+            if split.type == 2 and topStack.tag == split.tag then
+                table.remove(stack, #stack)
+                startIndex = i + 1
+            end
+            split = table.remove(splits, 1)
         end
     end
-    if tempStr ~= "" then
-        table.insert(strTemp, {str = tempStr, index = configNum + 1})
+    if startIndex <= #str then
+        table.insert(temp, {str = string.sub(str, startIndex, -1), index = configNum + 1})
     end
-    return strTemp
+    return temp
 end
 
 function string.numToAscii(num, long)

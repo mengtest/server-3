@@ -7,10 +7,10 @@ require("framework.utils.functions")
 
 local CMD = {}
 
-local function response(id, ...)
-	local ok, err = httpd.write_response(sockethelper.writefunc(id), ...)
+local function response(fd, ...)
+	local ok, err = httpd.write_response(sockethelper.writefunc(fd), ...)
 	if not ok then
-		skynet.error(string.format("fd = %d, %s", id, err))
+		skynet.error(string.format("fd = %d, %s", fd, err))
 	end
 end
 
@@ -70,13 +70,13 @@ function CMD.upload(url, query, header, body)
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function (_,_,id)
-		socket.start(id)  -- 开始接收一个 socket
+	skynet.dispatch("lua", function (_,_,fd)
+		socket.start(fd)  -- 开始接收一个 socket
 		-- 一般的业务不需要处理大量上行数据，为了防止攻击，做了一个 4K 限制。这个限制可以去掉。
-		local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id))
+		local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(fd))
 		if code then
 			if code ~= 200 then  -- 如果协议解析有问题，就回应一个错误码 code 。
-				response(id, code)
+				response(fd, code)
             else
 				local path, query = urllib.parse(url)
 				if query then
@@ -85,9 +85,9 @@ skynet.start(function()
                 local funcName, newPath = string.match(path, "^/([^/]+)(.*)")
                 if CMD[funcName] then
                     local newCode, data = CMD[funcName](newPath, query, header, body)
-                    response(id, newCode or code, data)
+                    response(fd, newCode or code, data)
                 else
-                    response(id, 405)
+                    response(fd, 405)
                 end
 			end
 		else
@@ -98,6 +98,6 @@ skynet.start(function()
 				skynet.error(url)
 			end
 		end
-		socket.close(id)
+		socket.close(fd)
 	end)
 end)
